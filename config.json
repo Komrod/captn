@@ -1,0 +1,36 @@
+{
+  "server": {
+    "port": "666",
+    "dir": "www/"
+  },
+  "page": {
+    "default": "index.html",
+    "script": "node.js",
+    "error": {
+      "401": "page/401.html",
+      "404": "page/404.html",
+      "500": "page/500.html"
+    }
+  },
+  "url": {
+  },
+  "methods": {
+    "allowed": ["OPTIONS", "GET", "POST"]
+  },
+  "log": {
+    "access": {
+      "enabled": true,
+      "path": "log/access.log",
+      "console": false
+    },
+    "error": {
+      "debug": true,
+      "enabled": true,
+      "path": "log/error.log",
+      "console": true
+    },
+    "warning": {
+      "enabled": true
+    }
+  }
+}
