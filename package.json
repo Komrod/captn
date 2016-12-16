@@ -23,6 +23,6 @@
   },
   "homepage": "https://github.com/Komrod/captn#readme",
   "dependencies": {
-    "web-servo": "^0.4.1"
+    "web-servo": "^0.5.0"
   }
 }
