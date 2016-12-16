@@ -1,18 +1,14 @@
 {
   "server": {
-    "port": "666",
-    "dir": "www/"
+    "port": "600",
+    "dir": "www/",
+    "ssl": {
+      "key": "ssl/captn.key",
+      "cert": "ssl/captn.crt"
   },
   "page": {
     "default": "index.html",
-    "script": "node.js",
-    "error": {
-      "401": "page/401.html",
-      "404": "page/404.html",
-      "500": "page/500.html"
-    }
-  },
-  "url": {
+    "script": "node.js"
   },
   "methods": {
     "allowed": ["OPTIONS", "GET", "POST"]
