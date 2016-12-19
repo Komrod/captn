@@ -39,6 +39,20 @@ function act(result, canExit) {
 		process.exit(1);
 	}
 
+	if (result && result.messages && sd.isArray(result.messages)) {
+		for (var t=0; t<result.messages.length; t++) {
+			if (result.messages[t].type == 'error') {
+				error(result.messages[t].message);
+			} else if (result.messages[t].type == 'warning') {
+				warning(result.messages[t].message);
+			} else if (result.messages[t].type == 'info') {
+				info(result.messages[t].message);
+			} else {
+				log(result.messages[t].message);
+			}
+		}
+	}
+
 	if (!result.success && canExit) {
 		error('Aborting');
 		process.exit(1);
@@ -59,7 +73,7 @@ try {
 program
 	.version('0.1.0');
 
-info('captn v'+program._version+' - '+sd.getDateTime());
+log('captn v'+program._version+' - '+sd.getDateTime());
 
 
 program
@@ -77,6 +91,7 @@ program
 
 		if (command == 'list') {
 			act(captn.getScriptList());
+			process.exit(0);
 		}
 
 		// server
@@ -88,8 +103,9 @@ program
 				info('List of scripts: captn --list');
 				process.exit(1);
 			}
-			var scriptName = options.argument;
-			act(captn.scriptLoad(scriptName));
+			act(captn.loadScript(argument));
+			act(captn.runScript());
+			process.exit(0);
 		}
 
 		// client
