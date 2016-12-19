@@ -1,0 +1,6 @@
+{
+  "script": {
+    "path": "./script/",
+    "default": ""
+  }
+}

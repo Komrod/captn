@@ -1,0 +1,14 @@
+{
+	"description": "Synergie&vous API offre",
+	"warning" : "",
+	"sshHost": "",
+	"sshPort": "",
+	"sshUser": "",
+	"path": "",
+	"commands": {
+		"beforeGit": [],
+		"afterGit": [],
+		"beforeDeploy": [],
+		"afterDeploy": []
+	}
+}

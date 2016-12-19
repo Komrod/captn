@@ -1,7 +1,7 @@
 {
   "name": "captn",
   "version": "0.1.0",
-  "description": "Easy web production deployment",
+  "description": "Easy web server deployment",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -23,6 +23,15 @@
   },
   "homepage": "https://github.com/Komrod/captn#readme",
   "dependencies": {
+    "chalk": "^1.1.3",
+    "co": "^4.6.0",
+    "co-prompt": "^1.0.0",
+    "colors": "^1.1.2",
+    "commander": "^2.9.0",
+    "node-screwdriver": "^0.1.2",
     "web-servo": "^0.5.0"
+  },
+  "bin": {
+    "captn": "captn.js"
   }
 }
