@@ -3,7 +3,8 @@ var sd = require('node-screwdriver');
 
 function captn() {
 	
-	this.configFile = '../captn.json';
+	this.dirRoot = process.cwd()+'/';
+	this.configFile = this.dirRoot+'captn.json';
 	this.hasError = false;
 	this.isReady = false;
 	this.configData = {};
@@ -13,7 +14,7 @@ function captn() {
 		this.configData = require(this.configFile);
 	} catch (e) {
 		this.hasError = true;
-		throw 'Could not open "'+this.configFile+'" file';
+		throw 'Could not open "'+this.configFile+'" file. Your directory is not a captn directory';
 	}
 
 };
@@ -24,59 +25,22 @@ captn.prototype.initClientDir = function() {
 	var result = this.newResult();
 	result.messages.push({message: 'Initializing directory in client mode', type: 'log'});
 	
-	if (!sd.dirExists('./log/')) {
-		result.messages.push({message: 'Creating the log directory', type: 'log'});
-		sd.mkdirpSync('./log/');
-		if (!sd.dirExists('./log/')) {
-			result.messages.push({message: 'Could not create directory "./log/"', type: 'error'});
-		}
-	} else {
-		result.messages.push({message: 'The log directory already exists', type: 'log'});
-	}
+	this.createDir(this.dirRoot+'log/', result);
+	this.createDir(this.dirRoot+'script/', result);
 
-	if (!sd.dirExists('./script/')) {
-		result.messages.push({message: 'Creating the script directory', type: 'log'});
-		sd.mkdirpSync('./script/');
-		if (!sd.dirExists('./script/')) {
-			result.messages.push({message: 'Could not find script "./script/"', type: 'error'});
+	var content = JSON.stringify({
+		"mode": "client",
+		"script": {
+			"path": "./script/"
+		},
+		"log": {
+			"path": "./log/"
 		}
-	} else {
-		result.messages.push({message: 'The script directory already exists', type: 'log'});
-	}
+	});
+	this.createFile(this.dirRoot+'captn.json', content, result);
 
-	if (!sd.fileExists('./captn.json')) {
-		result.messages.push({message: 'Creating the default config in "captn.json"', type: 'log'});
-		var config = {
-		  "mode": "client",
-		  "script": {
-		    "path": "./script/"
-		  },
-		  "log": {
-		    "path": "./log/"
-		  }
-		};
-		try {
-			require('fs').writeFileSync("./captn.json", JSON.stringify(config));
-		} catch (e) {
-			result.messages.push({message: 'Could not write file "captn.json"', type: 'error'});
-			result.messages.push({message: (e+''), type: 'error'});
-		}
-	} else {
-		result.messages.push({message: 'The file "captn.json" already exists', type: 'log'});
-	}
-
-	if (!sd.fileExists('./.gitignore')) {
-		result.messages.push({message: 'Creating the default ".gitignore"', type: 'log'});
-		var gitignore = "*.log\nnpm-debug.log*\nnode_modules\n.npm\n*.crt\n*.key\n";
-		try {
-			require('fs').writeFileSync("./.gitignore", gitignore);
-		} catch (e) {
-			result.messages.push({message: 'Could not write file ".gitignore"', type: 'error'});
-			result.messages.push({message: (e+''), type: 'error'});
-		}
-	} else {
-		result.messages.push({message: 'The file ".gitignore" already exists', type: 'log'});
-	}
+	var content = "*.log\nnpm-debug.log*\nnode_modules\n.npm\n*.crt\n*.key\n";
+	this.createFile(this.dirRoot+'captn.json', content, result);
 
 	return result;
 };
@@ -87,63 +51,51 @@ captn.prototype.initServerDir = function() {
 	var result = this.newResult();
 	result.messages.push({message: 'Initializing directory in server mode', type: 'log'});
 	
-	if (!sd.dirExists('./log/')) {
-		result.messages.push({message: 'Creating the log directory', type: 'log'});
-		sd.mkdirpSync('./log/');
-		if (!sd.dirExists('./log/')) {
-			result.messages.push({message: 'Could not create directory "./log/"', type: 'error'});
-		}
-	} else {
-		result.messages.push({message: 'The log directory already exists', type: 'log'});
-	}
+	this.createDir(this.dirRoot+'log/', result);
+	this.createDir(this.dirRoot+'script/', result);
 
-	if (!sd.dirExists('./script/')) {
-		result.messages.push({message: 'Creating the script directory', type: 'log'});
-		sd.mkdirpSync('./script/');
-		if (!sd.dirExists('./script/')) {
-			result.messages.push({message: 'Could not find script "./script/"', type: 'error'});
+	var content = JSON.stringify({
+		"mode": "server",
+		"script": {
+			"path": "./script/"
+		},
+		"log": {
+			"path": "./log/"
 		}
-	} else {
-		result.messages.push({message: 'The script directory already exists', type: 'log'});
-	}
+	});
+	this.createFile(this.dirRoot+'captn.json', content, result);
 
-	if (!sd.fileExists('./captn.json')) {
-		result.messages.push({message: 'Creating the default config in "captn.json"', type: 'log'});
-		var config = {
-		  "mode": "server",
-		  "script": {
-		    "path": "./script/"
-		  },
-		  "log": {
-		    "path": "./log/"
-		  }
-		};
-		try {
-			require('fs').writeFileSync("./captn.json", JSON.stringify(config));
-		} catch (e) {
-			result.messages.push({message: 'Could not write file "captn.json"', type: 'error'});
-			result.messages.push({message: (e+''), type: 'error'});
-		}
-	} else {
-		result.messages.push({message: 'The file "captn.json" already exists', type: 'log'});
-	}
-
-	if (!sd.fileExists('./.gitignore')) {
-		result.messages.push({message: 'Creating the default ".gitignore"', type: 'log'});
-		var gitignore = "*.log\nnpm-debug.log*\nnode_modules\n.npm\n*.crt\n*.key\n";
-		try {
-			require('fs').writeFileSync("./.gitignore", gitignore);
-		} catch (e) {
-			result.messages.push({message: 'Could not write file ".gitignore"', type: 'error'});
-			result.messages.push({message: (e+''), type: 'error'});
-		}
-	} else {
-		result.messages.push({message: 'The file ".gitignore" already exists', type: 'log'});
-	}
+	var content = "*.log\nnpm-debug.log*\nnode_modules\n.npm\n*.crt\n*.key\n";
+	this.createFile(this.dirRoot+'captn.json', content, result);
 
 	return result;
 };
 
+captn.prototype.createFile = function(file, content, result) {
+	if (!sd.fileExists(file)) {
+		result.messages.push({message: 'Creating the file "'+file+'"', type: 'log'});
+		try {
+			require('fs').writeFileSync(file, content);
+		} catch (e) {
+			result.messages.push({message: 'Could not write file "'+file+'"', type: 'error'});
+			result.messages.push({message: (e+''), type: 'error'});
+		}
+	} else {
+		result.messages.push({message: 'The file "'+file+'" already exists', type: 'log'});
+	}
+};
+
+captn.prototype.createDir = function(dir, result) {
+	if (!sd.dirExists(dir)) {
+		result.messages.push({message: 'Creating the directory "'+dir+'"', type: 'log'});
+		sd.mkdirpSync(dir);
+		if (!sd.dirExists(dir)) {
+			result.messages.push({message: 'Could not create directory "'+dir+'"', type: 'error'});
+		}
+	} else {
+		result.messages.push({message: 'The directory "'+dir+'" already exists', type: 'log'});
+	}
+};
 
 /**********************************************************************
  * Result
@@ -158,6 +110,10 @@ captn.prototype.newResult = function() {
 };
 
 
+captn.prototype.getDefaultUsername = function() {
+	var path = require('path');
+	return process.env['USERPROFILE'].split(path.sep)[2] || '';
+}
 
 /**********************************************************************
  * Script
@@ -168,10 +124,6 @@ captn.prototype.getScriptFile = function(scriptName) {
 };
 
 captn.prototype.getScriptDir = function(scriptName) {
-	return this.configData.script.path+'/'+scriptName+'/';
-};
-
-captn.prototype.createScriptDir = function(scriptName) {
 	return this.configData.script.path+'/'+scriptName+'/';
 };
 
@@ -191,7 +143,7 @@ captn.prototype.loadScript = function(scriptName) {
 	
 	var scriptFile = this.getScriptFile(scriptName);
 	try {
-		this.scriptData = require('../'+scriptFile);
+		this.scriptData = require(this.dirRoot+scriptFile);
 	} catch (e) {
 		result.messages.push({message: 'Could not find script "'+scriptFile+'"', type: 'error'});
 		result.messages.push({message: e+'', type: 'error'});

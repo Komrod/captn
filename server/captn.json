@@ -1,0 +1,11 @@
+{
+	"mode": "client",
+	"script":
+	{
+		"path": "./script/"
+	},
+	"log":
+	{
+		"path": "./log/"
+	}
+}

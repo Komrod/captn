@@ -111,6 +111,7 @@ captn_cli.prototype.run = function() {
 	this.program
 		.arguments('<command> [argument]')
 		.option("--verbose", "Verbose mode")
+		.option("-f, --force", "Force mode")
 		.action(function(command, argument, options) {
 			command = command || '';
 			cli.version();
@@ -144,7 +145,8 @@ captn_cli.prototype.run = function() {
 				cli.act(cli.captn.loadScript(argument));
 				cli.result('Description: '+(cli.captn.scriptData.description || ''));
 				cli.result('SSH host: '+(cli.captn.scriptData.sshHost || ''));
-				cli.result('SSH host: '+(cli.captn.scriptData.sshHost || ''));
+				cli.result('SSH user: '+(cli.captn.scriptData.sshUser || '')
+					+' (default '+cli.captn.getDefaultUsername()+')');
 				process.exit(0);
 			}
 

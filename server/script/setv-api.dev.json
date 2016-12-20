@@ -2,21 +2,14 @@
 	"description": "Synergie&vous API offre",
 	"warning" : "",
 	"delay": 0,
-	"sshHost": "",
+	"sshHost": "213.56.106.163",
 	"sshPort": "",
 	"sshUser": "",
 	"path": "",
 	"commands": {
-		"beforeGit": [], 	/* Clean working directory */
-		"afterGit": [], 	/* Check for errors in files */
-		"beforeDeploy": [], /* Prepare deploy */
-		"afterDeploy": []	/* Clean cache ... */
+		"beforeGit": [],
+		"afterGit": [],
+		"beforeDeploy": [],
+		"afterDeploy": []
 	}
 }
-/**
- * {dir-root}: root directory of the client / server
- * {dir-log}: log directory
- * {dir-script}: script directory
- * {script-name}: script name
- * {script-file}: script file
- */
