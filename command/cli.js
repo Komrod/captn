@@ -1,36 +1,60 @@
 
-var program = require('commander');
 var sd = require('node-screwdriver');
 
 //var path = require('path');
 //var userName = process.env['USERPROFILE'].split(path.sep)[2];
 
 
+function captn_cli() {
+
+}
+
 
 /**
  * Force colors in the console using Chalk
  */
 
-function error(message) {
+captn_cli.prototype.error = function(message) {
 	const chalk = require('chalk');
 	console.log(chalk.styles.red.open + message + chalk.styles.red.close);
-}
+};
 
-function warning(message) {
+captn_cli.prototype.warning = function(message) {
+	if (this.program && this.program.verbose) {
+		const chalk = require('chalk');
+		console.log(chalk.styles.yellow.open + message + chalk.styles.yellow.close);
+	}
+};
+
+captn_cli.prototype.log = function(message, noColors) {
+	if (this.program && this.program.verbose) {
+		const chalk = require('chalk');
+		if (noColors) {
+			console.log(message);
+		} else {
+			console.log(chalk.styles.gray.open + message + chalk.styles.gray.close);
+		}
+	}
+};
+
+captn_cli.prototype.info = function(message) {
+	if (this.program && this.program.verbose) {
+		const chalk = require('chalk');
+		console.log(chalk.styles.cyan.open + message + chalk.styles.cyan.close);
+	}
+};
+
+captn_cli.prototype.result = function(message) {
 	const chalk = require('chalk');
-	console.log(chalk.styles.yellow.open + message + chalk.styles.yellow.close);
-}
+	console.log(chalk.styles.white.open + message + chalk.styles.white.close);
+};
 
-function log(message) {
-	console.log(message);
-}
-
-function info(message) {
+captn_cli.prototype.success = function(message) {
 	const chalk = require('chalk');
-	console.log(chalk.styles.cyan.open + message + chalk.styles.cyan.close);
-}
+	console.log(chalk.styles.green.open + message + chalk.styles.green.close);
+};
 
-function act(result, canExit) {
+captn_cli.prototype.act = function(result, canExit) {
 
 	if (sd.isUndefined(canExit)) canExit = true;
 
@@ -42,79 +66,120 @@ function act(result, canExit) {
 	if (result && result.messages && sd.isArray(result.messages)) {
 		for (var t=0; t<result.messages.length; t++) {
 			if (result.messages[t].type == 'error') {
-				error(result.messages[t].message);
+				this.error(result.messages[t].message);
 			} else if (result.messages[t].type == 'warning') {
-				warning(result.messages[t].message);
+				this.warning(result.messages[t].message);
 			} else if (result.messages[t].type == 'info') {
-				info(result.messages[t].message);
+				this.info(result.messages[t].message);
+			} else if (result.messages[t].type == 'result') {
+				this.result(result.messages[t].message);
+			} else if (result.messages[t].type == 'success') {
+				this.success(result.messages[t].message);
 			} else {
-				log(result.messages[t].message);
+				this.log(result.messages[t].message);
 			}
 		}
 	}
 
 	if (!result.success && canExit) {
-		error('Aborting');
+		this.error('Aborting');
 		process.exit(1);
-
 	}
+};
+
+captn_cli.prototype.version = function() {
+	const chalk = require('chalk');
+	this.log(chalk.styles.green.open + 'captn' + chalk.styles.green.close 
+		+ chalk.styles.cyan.open + ' v'+this.program._version + chalk.styles.cyan.close 
+		+ ' - '+sd.getDateTime(), true);
+
 }
 
+captn_cli.prototype.run = function() {
+
+	try {
+		this.program = require('commander');
+		this.captn = require('./captn.js');
+	} catch (e) {
+		this.error(e);
+		process.exit(1);
+	}
+	this.program.version('0.1.0');
+	var cli = this;
 
 
+	this.program
+		.arguments('<command> [argument]')
+		.option("--verbose", "Verbose mode")
+		.action(function(command, argument, options) {
+			command = command || '';
+			cli.version();
 
-try {
-	var captn = require('./captn.js');
-} catch (e) {
-	error(e);
-	process.exit(1);
-}
-
-program
-	.version('0.1.0');
-
-log('captn v'+program._version+' - '+sd.getDateTime());
-
-
-program
-	.arguments('<command> [argument]')
-/*
-	.option("-d, --default [defaultName]", "Set the default script")
-	.option("-c, --create [createName]", "Create a script")
-	.option("-g, --git [branch]", "Branch or tag to update to")
-	.option("-d, --dir [dir]", "Working directory")
-	.option("-u, --user [userName]", "User name, default current user")
-*/
-	.action(function(command, argument, options) {
-//console.log('command='+command+', argument='+argument+', options=', options);		
-		command = command || '';
-
-		if (command == 'list') {
-			act(captn.getScriptList());
-			process.exit(0);
-		}
-
-		// server
-		if (command == 'run') {
-			
-			if (!argument) {
-				error('No script specified');
-				info('Proper command: captn run <scriptName>');
-				info('List of scripts: captn --list');
-				process.exit(1);
+			if (command == 'init') {
+				if (argument == 'server') {
+					cli.act(cli.captn.initServerDir());
+				} else {
+					cli.act(cli.captn.initClientDir());
+				}
+				process.exit(0);
 			}
-			act(captn.loadScript(argument));
-			act(captn.runScript());
-			process.exit(0);
-		}
 
-		// client
-		
-	})
-	.parse(process.argv);
+			if (command == 'list') {
+				cli.act(cli.captn.getScriptList());
+				process.exit(0);
+			}
+
+			if (command == 'info') {
+				if (!argument) {
+					cli.error('No script specified');
+					cli.info('Proper command: captn info <scriptName>');
+					cli.info('List of scripts: captn list');
+					process.exit(1);
+				}
+				cli.result('Path: '+cli.captn.getScriptFile(argument));
+				if (!sd.fileExists(cli.captn.getScriptFile(argument))) {
+					cli.error('Script file does not exist');
+					process.exit(1);
+				}
+				cli.act(cli.captn.loadScript(argument));
+				cli.result('Description: '+(cli.captn.scriptData.description || ''));
+				cli.result('SSH host: '+(cli.captn.scriptData.sshHost || ''));
+				cli.result('SSH host: '+(cli.captn.scriptData.sshHost || ''));
+				process.exit(0);
+			}
+
+			// run
+			if (command == 'run') {
+				
+				if (!argument) {
+					cli.error('No script specified');
+					cli.info('Proper command: captn run <scriptName>');
+					cli.info('List of scripts: captn list');
+					process.exit(1);
+				}
+				cli.act(cli.captn.loadScript(argument));
+				cli.act(cli.captn.runScript());
+				process.exit(0);
+			}
+
+			cli.error('Unrecognized command');
+			if (cli.program && cli.program.verbose) {
+				cli.program.outputHelp();
+			}
+			process.exit(1);
+			
+		})
+		.parse(process.argv);
+
+	this.version();
+	this.error('No command to execute');
+	if (this.program && this.program.verbose) {
+		this.program.outputHelp();
+	}
+	process.exit(1);
+};
 
 
-error('No command to execute');
-program.outputHelp();
-process.exit(1);
+var cli = new captn_cli();
+cli.run();
 
