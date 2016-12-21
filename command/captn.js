@@ -17,6 +17,15 @@ function captn() {
 		throw 'Could not open "'+this.configFile+'" file. Your directory is not a captn directory';
 	}
 
+	if (this.configData.mode != 'server' && this.configData.mode != 'server') {
+		this.configData.mode = 'client';
+	}
+	if (!sd.endsWith(this.configData.script.path, '/')) {
+		this.configData.script.path += '/';
+	}
+	if (!sd.endsWith(this.configData.log.path, '/')) {
+		this.configData.log.path += '/';
+	}
 };
 
 
@@ -31,10 +40,10 @@ captn.prototype.initClientDir = function() {
 	var content = JSON.stringify({
 		"mode": "client",
 		"script": {
-			"path": "./script/"
+			"path": "script/"
 		},
 		"log": {
-			"path": "./log/"
+			"path": "log/"
 		}
 	});
 	this.createFile(this.dirRoot+'captn.json', content, result);
@@ -57,10 +66,10 @@ captn.prototype.initServerDir = function() {
 	var content = JSON.stringify({
 		"mode": "server",
 		"script": {
-			"path": "./script/"
+			"path": "script/"
 		},
 		"log": {
-			"path": "./log/"
+			"path": "log/"
 		}
 	});
 	this.createFile(this.dirRoot+'captn.json', content, result);
@@ -97,6 +106,7 @@ captn.prototype.createDir = function(dir, result) {
 	}
 };
 
+
 /**********************************************************************
  * Result
  *********************************************************************/
@@ -113,18 +123,25 @@ captn.prototype.newResult = function() {
 captn.prototype.getDefaultUsername = function() {
 	var path = require('path');
 	return process.env['USERPROFILE'].split(path.sep)[2] || '';
-}
+};
+
+captn.prototype.getDefaultSshPort = function() {
+	return 22;
+};
+
+
+
 
 /**********************************************************************
  * Script
  *********************************************************************/
 
 captn.prototype.getScriptFile = function(scriptName) {
-	return this.configData.script.path+'/'+scriptName+'.json';
+	return this.configData.script.path+scriptName+'.json';
 };
 
 captn.prototype.getScriptDir = function(scriptName) {
-	return this.configData.script.path+'/'+scriptName+'/';
+	return this.configData.script.path+scriptName+'/';
 };
 
 
@@ -145,7 +162,7 @@ captn.prototype.loadScript = function(scriptName) {
 	try {
 		this.scriptData = require(this.dirRoot+scriptFile);
 	} catch (e) {
-		result.messages.push({message: 'Could not find script "'+scriptFile+'"', type: 'error'});
+		result.messages.push({message: 'Could not load script "'+scriptFile+'"', type: 'error'});
 		result.messages.push({message: e+'', type: 'error'});
 		result.success = false;
 		this.isReady = false;
@@ -199,32 +216,50 @@ captn.prototype.getScriptList = function(scriptName) {
  * Server
  *********************************************************************/
 
-captn.prototype.run = function() {
+captn.prototype.runScript = function() {
+
+
 	var result = this.newResult();
 
 	if (this.hasError) {
+		result.messages.push({message: 'Could not run script. Captn is in an error state', type: 'error'});
 		result.success = false;
 		return result;
 	}
 
 	if (!this.isReady) {
-		result.messages.push({message: 'captn is not ready to run', type: 'error'});
+		result.messages.push({message: 'Could not run script. Captn is not ready to run', type: 'error'});
+		this.hasError = true;
+		result.success = false;
+		return result;
+	}
+
+	if (!this.scriptData) {
+		result.messages.push({message: 'Could not run script. Script data is empty', type: 'error'});
 		result.success = false;
 		this.hasError = true;
 		return result;
 	}
 
-	if (!this.scriptData) {
-		result.messages.push({message: 'script data is empty', type: 'error'});
+	if (!this.scriptData.commands || this.scriptData.commands.length == 0) {
+		result.messages.push({message: 'No commands to run', type: 'error'});
 		result.success = false;
 		this.hasError = true;
 		return result;
 	}
 
 	try {
-		// sd.mkdirpSync('')
+		for (t=0; t<this.scriptData.commands.length; t++) {
+			var result = this.newResult();
+
+			result.messages.push({message: 'Running command '+(t+1)+" \""+this.getCommandLine(this.scriptData.commands[t])+"\"", type: 'log'});
+			if (this.scriptData.commands[t].skip) {
+				result.messages.push({message: 'Skipping command "'+this.scriptData.commands[t].exec+'"', type: 'warning'});
+				continue;
+			}
+			this.runCommand(this.scriptData.commands[t], result);
+		}
 	} catch (e) {
-		result.messages.push({message: 'Could not open directory "'+dir+'"', type: 'error'});
 		result.messages.push({message: e+'', type: 'error'});
 		result.success = false;
 		return result;
@@ -233,6 +268,134 @@ captn.prototype.run = function() {
 	return result;
 };
 
+
+captn.prototype.getCommandLine = function(command) {
+	if (sd.isString(command)) {
+		return command;
+	}
+	var line = command.exec;
+	if (command.params && sd.isString(command.params)) {
+		line += ' '+command.params;
+	} else if (command.params && command.params.length > 0) {
+		line += ' '+command.params.join(' ');
+	}
+	return sd.trim(line);
+};
+
+
+captn.prototype.getCommand = function(str) {
+	var elements = str.split(' ');
+	var command = {
+		exec: elements[0],
+	};
+	elements.shift();
+	if (elements.length > 0) {
+		command.params = elements;
+	}
+	return command;
+};
+
+
+captn.prototype.runCommand = function(command, result) {
+	result = result || this.newResult();
+	var quit = false;
+
+	if (sd.isString(command)) {
+		command = this.getCommand(command);
+	} else if (sd.contains(command.exec, " ")) {
+		tmp = this.getCommand(command.exec);
+		command.exec = tmp.exec;
+		if (tmp.params) {
+			command.params = tmp.params;
+		} else {
+			command.params = [];
+		}
+	}
+
+	if (sd.isString(command.params) && command.params != '') {
+		command.params = [command.params];
+	} else if (!sd.isArray(command.params)) {
+		command.params = null;
+	}
+
+	if (command.skip) {
+		result.messages.push({message: 'Skipping command "'+command.exec+'"', type: 'warning'});
+		return result;
+	}
+
+	if (command.onStart) {
+		result.messages.push({message: command.onStart, type: 'result'});
+	}
+
+	const spawn = require('child_process').spawn;
+	const exec = require('child_process').exec;
+
+	exec(this.getCommandLine(command), (error, stdout, stderr) => {
+		if (!command.hideResult) {
+			if (sd.trim(stdout) != '' && !command.hideResult) {
+				result.messages.push({message: sd.trim(stdout), type: 'result'});
+			}
+		}
+		if (error) {
+			if (sd.trim(stderr) != '') {
+				result.messages.push({message: sd.trim(stderr), type: 'error'});
+			}
+			result.messages.push({message: "An error occured", type: 'error'});
+			quit = true;
+			return;
+		} else {
+			if (sd.trim(stderr) != '') {
+				result.messages.push({message: sd.trim(stderr), type: 'warning'});
+			}
+		}
+
+		quit = true;
+	});
+
+
+	while (quit === false) {
+		require('deasync').sleep(10);
+	}
+
+	return result;
+
+	/*
+	if (command.params) {
+	    cmd = spawn(command.exec, command.params);
+	} else {
+	    cmd = spawn(command.exec);
+	}
+
+
+	cmd.stdout.on('data', (data) => {
+		if (!command.hideResult) {
+			result.messages.push({message: sd.trim(data), type: 'result'});
+		}
+	});
+
+	cmd.stderr.on('data', (data) => {
+		result.messages.push({message: sd.trim(data), type: 'error'});
+	});
+
+	cmd.on('close', (code) => {
+		result.messages.push({message: 'Command exit with code '+code, type: 'log'});
+		if (code != 0 && command.onError) {
+			result.messages.push({message: command.onError, type: 'error'});
+		}
+		if (code == 0 && command.onError) {
+			result.messages.push({message: command.onSuccess, type: 'success'});
+		}
+		result.success = false;
+		quit = true;
+	});
+
+	while (quit === false) {
+		require('deasync').sleep(10);
+	}
+
+	return result;
+	*/
+};
 
 
 /**********************************************************************

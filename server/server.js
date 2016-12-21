@@ -1,4 +1,4 @@
 
-require('web-servo').start();
+require('web-servo').config('web.json').start();
 
 

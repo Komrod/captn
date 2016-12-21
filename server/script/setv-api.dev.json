@@ -5,11 +5,11 @@
 	"sshHost": "213.56.106.163",
 	"sshPort": "",
 	"sshUser": "",
-	"path": "",
-	"commands": {
-		"beforeGit": [],
-		"afterGit": [],
-		"beforeDeploy": [],
-		"afterDeploy": []
-	}
+	"gitUser": "",
+	"gitBranch": "master",
+	"targetDir": "c:/",
+	"commands": [
+		"ls -l",
+		{"exec": "ls -l", "path": "../"}
+	]
 }

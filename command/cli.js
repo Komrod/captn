@@ -82,7 +82,7 @@ captn_cli.prototype.act = function(result, canExit) {
 	}
 
 	if (!result.success && canExit) {
-		this.error('Aborting');
+		this.error('Aborting on error');
 		process.exit(1);
 	}
 };
@@ -92,6 +92,9 @@ captn_cli.prototype.version = function() {
 	this.log(chalk.styles.green.open + 'captn' + chalk.styles.green.close 
 		+ chalk.styles.cyan.open + ' v'+this.program._version + chalk.styles.cyan.close 
 		+ ' - '+sd.getDateTime(), true);
+	if (this.captn && this.captn.configData && this.captn.configData.mode) {
+		cli.log('Running in '+this.captn.configData.mode+' mode');
+	}
 
 }
 
@@ -110,7 +113,7 @@ captn_cli.prototype.run = function() {
 
 	this.program
 		.arguments('<command> [argument]')
-		.option("--verbose", "Verbose mode")
+		.option("-v, --verbose", "Verbose mode")
 		.option("-f, --force", "Force mode")
 		.action(function(command, argument, options) {
 			command = command || '';
@@ -144,9 +147,15 @@ captn_cli.prototype.run = function() {
 				}
 				cli.act(cli.captn.loadScript(argument));
 				cli.result('Description: '+(cli.captn.scriptData.description || ''));
-				cli.result('SSH host: '+(cli.captn.scriptData.sshHost || ''));
-				cli.result('SSH user: '+(cli.captn.scriptData.sshUser || '')
-					+' (default '+cli.captn.getDefaultUsername()+')');
+				cli.result('SSH host: '+(cli.captn.scriptData.sshHost || 'none'));
+				cli.result('SSH port: '+(cli.captn.scriptData.sshPort || 'none')
+					+', default '+cli.captn.getDefaultSshPort());
+				cli.result('SSH user: '+(cli.captn.scriptData.sshUser || 'none')
+					+', default '+cli.captn.getDefaultUsername());
+				cli.result('GIT user: '+(cli.captn.scriptData.gitUser || 'none')
+					+', default '+cli.captn.getDefaultUsername());
+				cli.result('GIT branch: '+cli.captn.scriptData.gitBranch);
+				cli.result('Target directory: '+cli.captn.scriptData.targetDir);
 				process.exit(0);
 			}
 
@@ -159,7 +168,15 @@ captn_cli.prototype.run = function() {
 					cli.info('List of scripts: captn list');
 					process.exit(1);
 				}
+				
 				cli.act(cli.captn.loadScript(argument));
+
+				if (cli.captn.configData.mode == 'client' && !this.force) {
+					cli.error('Script is blocked in client mode');
+					process.exit(1);
+				}
+
+				cli.log('Running script');
 				cli.act(cli.captn.runScript());
 				process.exit(0);
 			}

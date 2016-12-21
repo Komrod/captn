@@ -2,10 +2,10 @@
 	"mode": "client",
 	"script":
 	{
-		"path": "./script/"
+		"path": "script/"
 	},
 	"log":
 	{
-		"path": "./log/"
+		"path": "log/"
 	}
 }
