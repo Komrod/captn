@@ -52,3 +52,8 @@ captn_clean: function to clean temporary directory and files
 captn_check: function to check if git branch is ready
 captn_patch: function to get the patch between the 2 branches
 captn_deploy: function to apply patch to 
+
+Git:
+git rev-parse HEAD // get last commit id
+git log edcfc6184b5cb30e29c0da3ccdec296379d3c7b8..0efeb3800396e15717b4f15fb572f5886fa49c50  --pretty=format:"%H - %cn, %ad : %s" // get list of commits to update
+

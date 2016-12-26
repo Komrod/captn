@@ -3,8 +3,8 @@
 #######################################
 # Captn - deploy script
 #######################################
-# Date: 2016-12-26 17:47:56
-# Local host: SYN1506
+# Date: 2016-12-26 18:34:15
+# Local host: Thierry-PC
 # SSH user: root
 # SSH server: 213.56.106.169:22
 #######################################
@@ -12,12 +12,12 @@
 
 # Variables
 
-script_sh="C:\Users\PR033\git\captn\server\script\setv-api.dev.sh"
+script_sh="C:\Users\Thierry\git\captn\server\script\setv-api.dev.sh"
 script_name="setv-api.dev"
-script_json="C:\Users\PR033\git\captn\server\script\setv-api.dev.json"
-script_temp="C:\Users\PR033\git\captn\server\script\setv-api.dev"
-script_date="2016-12-26 17:47:56"
-script_local="SYN1506"
+script_json="C:\Users\Thierry\git\captn\server\script\setv-api.dev.json"
+script_temp="C:\Users\Thierry\git\captn\server\script\setv-api.dev"
+script_date="2016-12-26 18:34:15"
+script_local="Thierry-PC"
 ssh_user="root"
 ssh_host="213.56.106.169"
 ssh_port="22"
