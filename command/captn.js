@@ -249,31 +249,157 @@ captn.prototype.runScript = function(onLog, onError, onExit, onResult) {
 		return false;
 	}
 
+	var vars = {};
+
 	// delete previous script
-	var file = this.configData.script.path+this.scriptName+'.sh';
-	if (sd.fileExists(file)) {
-		onLog('Deleting previous script file "'+file+'"');
-		require('fs').unlinkSync(file);
-		if (sd.fileExists(file)) {
-			onError('File "'+file+'" cannot be deleted');
+	vars.script_sh = require('path').resolve(this.configData.script.path+this.scriptName+'.sh');
+	if (sd.fileExists(vars.script_sh)) {
+		onLog('Deleting previous script file "'+vars.script_sh+'"');
+		require('fs').unlinkSync(vars.script_sh);
+		if (sd.fileExists(vars.script_sh)) {
+			onError('File "'+vars.script_sh+'" cannot be deleted');
 			onExit(1);
 			return false;
 		}
 	}
 
+	vars.script_name = this.scriptName;
+	vars.script_json = require('path').resolve(this.configData.script.path+this.scriptName+'.json');
+	vars.script_temp = require('path').resolve(this.configData.script.path+this.scriptName+'/');
+	vars.script_date = sd.getDateTime();
+	vars.script_local = require("os").hostname();
+
+	vars.ssh_user = this.scriptData.sshUser || this.getDefaultUsername();
+	vars.ssh_host = this.scriptData.sshHost;
+	vars.ssh_port = this.scriptData.sshPort || '22';
+//	vars.ssh_password = this.scriptData.sshPassword || '';
+
+	vars.git_branch = this.scriptData.gitBranch || '';
+	vars.git_branch_remote = '';
+	vars.git_user = this.scriptData.gitUser || this.getDefaultUsername();
+	vars.git_host = this.scriptData.gitHost;
+	vars.git_dir = this.scriptData.gitDir;
+
+	for(var name in vars) {
+		content += name+"=\""+vars[name]+"\"\n";
+	}
 
 	var content = "#!/bin/bash\n\n";
-	var os = require("os");
 	content += "#######################################\n";
 	content += "# Captn - deploy script\n";
 	content += "#######################################\n";
-	content += "# Date: "+sd.getDateTime()+"\n";
-	content += "# Host: "+os.hostname()+"\n";
-	content += "# SSH user: "+this.scriptData.sshUser+" ("+this.getDefaultUsername()+")\n";
-	content += "# To server: "+this.scriptData.sshHost+"\n";
+	content += "# Date: "+vars.script_date+"\n";
+	content += "# Local host: "+vars.script_local+"\n";
+	content += "# SSH user: "+vars.ssh_user+"\n";
+	content += "# SSH server: "+vars.ssh_host+":"+vars.ssh_port+"\n";
 	content += "#######################################\n";
 	content += "\n";
 	content += "\n";
+
+	content += "# Variables\n";
+	content += "\n";
+	for(var name in vars) {
+		content += name+"=\""+vars[name]+"\"\n";
+	}
+	content += "\n";
+	content += "\n";
+
+	content += "# Functions\n";
+	content += "\n";
+	content += "# Function to clean temporary directory and files\n";
+	content += "function captn_clean() {\n";
+	content += "	echo \"captn_clean: Start cleaning directory\"\n";
+	content += "	echo \"captn_clean: script temp directory is \\\"$script_temp\\\"\"\n";
+	content += "	echo \"captn_clean: deleting directory\"\n";
+	content += "	rm -fr \"$script_temp\"\n";
+	content += "	# Check delete error\n";
+	content += "	if [ $? != 0 ]; then\n"
+	content += "		(>&2 echo \"captn_clean: failed to delete directory. Aborting.\")\n";
+	content += "		exit 1;\n";
+	content += "	fi\n";
+	content += "	echo \"captn_clean: recreating directory\"\n";
+	content += "	mkdir \"$script_temp\"\n";
+	content += "	# Check creation error\n";
+	content += "	if [ $? != 0 ]; then\n"
+	content += "		(>&2 echo \"captn_clean: failed to create directory. Aborting.\")\n";
+	content += "		exit 1;\n";
+	content += "	fi\n";
+	content += "	echo \"Success: script temp directory cleaned\"\n";
+	content += "}\n";
+	content += "\n";
+	content += "\n";
+	content += "# Function to show informations on startup\n";
+	content += "function captn_start() {\n";
+	content += "	echo \"captn_start: script $script_name\"\n";
+	content += "}\n";
+	content += "\n";
+	content += "\n";
+	content += "# Function to check ssh and git validity\n";
+	content += "function captn_check() {\n";
+	content += "	echo \"captn_check: getting branch from server\"\n";
+	content += "	echo \"captn_check: connecting to $ssh_host:$ssh_port\"\n";
+	content += "	{\n";
+	if (vars.ssh_password == '') {
+		content += "		ssh -tt -p $ssh_port $ssh_user@$ssh_host \"cd "+vars.git_dir+" && git rev-parse --abbrev-ref HEAD\"\n";
+	} else {
+		content += "		echo \"$ssh_password\" | ssh -tt -p $ssh_port $ssh_user@$ssh_host \"cd "+vars.git_dir+" && git rev-parse --abbrev-ref HEAD\"\n";
+	}
+	content += "	} > $script_temp/remote_branch.txt 2> /dev/null\n";
+	content += "	return_code=$?\n";
+	content += "	if [ $(grep -c \"fatal\" $script_temp/remote_branch.txt) -ne 0 ]; then\n"
+	content += "		(>&2 cat $script_temp/remote_branch.txt)\n";
+	content += "		(>&2 echo \"captn_check: failed to get the remote branch name. Aborting.\")\n";
+	content += "		exit 1;\n";
+	content += "	fi\n";
+	content += "	if [ $return_code -ne 0 ]; then\n"
+	content += "		(>&2 echo \"captn_check: failed to connect to SSH. Aborting.\")\n";
+	content += "		exit 1;\n";
+	content += "	fi\n";
+	content += "	git_branch_remote=`cat $script_temp/remote_branch.txt`\n";
+	content += "	git_branch_remote=\"$(echo -e \"${git_branch_remote}\" | tr -d '[:space:]')\"\n";
+content += "echo \"git_branch_remote = $git_branch_remote\"\n";	
+content += "echo \"git_branch = $git_branch\"\n";	
+	content += "	if [ \"$git_branch_remote\" != \"$git_branch\" ]; then\n"
+	content += "		(>&2 echo \"captn_check: server branch \\\"$git_branch_remote\\\" in \\\"$git_dir\\\" is supposed to be \\\"$git_branch\\\".\")\n";
+	content += "		exit 1;\n";
+	content += "	fi\n";
+	content += "	echo \"Success: actual server branch is \\\"$git_branch_remote\\\"\"\n";
+	content += "}\n";
+	content += "\n";
+	content += "\n";
+
+/*
+
+script_json: absolute path for the json file of the script
+script_sh: absolute path for the sh file of the script
+script_name: name of the script
+script_target: target directory of the site to deploy
+
+git_user:
+git_dir:
+git_branch_from:
+git_branch_to:
+
+ssh_host:
+ssh_port:
+ssh_user:
+
+skip_check: value 1 if you want to skip the captn_git_check
+skip_patch: value 1 if you want to skip the captn_git_patch and captn_apply
+skip_deploy: value 1 if you want to skip the captn_deploy
+
+captn_dir: root directory of captn
+captn_version: version of captn
+
+
+Functions:
+captn_clean: function to clean all directories
+captn_check: function to check if git branch is ready
+captn_patch: function to get the patch between the 2 branches
+captn_deploy: function to apply patch to 
+
+ */
+
 
 	try {
 		for (t=0; t<this.scriptData.commands.length; t++) {
@@ -300,13 +426,13 @@ captn.prototype.runScript = function(onLog, onError, onExit, onResult) {
 			content += "\n";
 		}
 
-		onLog('Writting script in file "'+file+'"');
-		require('fs').writeFileSync(file, content);
+		onLog('Writting script in file "'+vars.script_sh+'"');
+		require('fs').writeFileSync(vars.script_sh, content);
 
 		onLog('Running script');
 
 		var spawn = require('child_process').spawn,
-		    shell = spawn('sh', [file]),
+		    shell = spawn(this.configData.script.shell || 'bash', [vars.script_sh]),
 		    quit = false;
 
 		shell.stdout.on('data', function (data) {

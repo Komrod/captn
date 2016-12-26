@@ -187,7 +187,15 @@ captn_cli.prototype.run = function() {
 				}
 
 				function handleLog(message) {
-					cli.log(message);
+					if (sd.startsWith(sd.trim(message), 'Success:')) {
+						cli.success(message);
+					} else if (sd.startsWith(message, 'Warning:')){
+						cli.warning(message);
+					} else if (sd.startsWith(message, 'Error:')){
+						cli.error(message);
+					} else {
+						cli.log(message);
+					}
 				}
 
 				function handleError(message) {
@@ -195,10 +203,22 @@ captn_cli.prototype.run = function() {
 				}
 
 				function handleResult(message) {
-					cli.result(message);
+					if (sd.startsWith(sd.trim(message), 'Success:')) {
+						cli.success(message);
+					} else if (sd.startsWith(message, 'Warning:')){
+						cli.warning(message);
+					} else if (sd.startsWith(message, 'Error:')){
+						cli.error(message);
+					} else {
+						if (cli.program.verbose) {
+							cli.result(message);
+						} else {
+							cli.log(message);
+						}
+					}
 				}
 
-				cli.log('Start building script');
+				cli.result('Start script');
 				cli.captn.runScript(handleLog, handleError, handleExit, handleResult);
 				process.exit(0);
 			}

@@ -2,16 +2,19 @@
 	"description": "Synergie&vous API offre",
 	"warning" : "",
 	"delay": 0,
-	"sshHost": "213.56.106.163",
-	"sshPort": "",
-	"sshUser": "",
-	"gitUser": "",
-	"gitBranch": "master",
-	"targetDir": "c:/",
+	"sshHost": "213.56.106.169",
+	"sshPort": "22",
+	"sshUser": "root",
+	"sshPassword": "hAku2ayu",
+	"gitHost": "srv006.domsyn.fr",
+	"gitUser": "07516",
+	"gitPassword": "Azerty789",
+	"gitBranch": "develop",
+	"gitCommit": "",
+	"gitDir": "/var/www/html/setv-recruteur/",
 	"commands": [
-		"ls -l",
-		{"exec": "skip", "skip": true},
-		{"exec": "ls -l", "onSuccess": "ok"},
-		{"exec": "ls -l azerty", "onError": "error"}
+		{"exec": "captn_start"},
+		{"exec": "captn_clean"},
+		{"exec": "captn_check"}
 	]
 }

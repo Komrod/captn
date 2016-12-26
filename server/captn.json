@@ -2,7 +2,8 @@
 	"mode": "client",
 	"script":
 	{
-		"path": "script/"
+		"path": "script/",
+		"shell": "bash"
 	},
 	"log":
 	{
