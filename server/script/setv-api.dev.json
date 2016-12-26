@@ -10,6 +10,8 @@
 	"targetDir": "c:/",
 	"commands": [
 		"ls -l",
-		{"exec": "ls -l", "path": "../"}
+		{"exec": "skip", "skip": true},
+		{"exec": "ls -l", "onSuccess": "ok"},
+		{"exec": "ls -l azerty", "onError": "error"}
 	]
 }
