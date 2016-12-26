@@ -176,8 +176,30 @@ captn_cli.prototype.run = function() {
 					process.exit(1);
 				}
 
-				cli.log('Running script');
-				cli.act(cli.captn.runScript());
+				function handleExit(code) {
+					if (code == 0) {
+						cli.log('Script exit with no error. Exit code '+code);
+						process.exit(0);
+					}
+
+					cli.error('Script exit with error. Exit code '+code);
+					process.exit(code);
+				}
+
+				function handleLog(message) {
+					cli.log(message);
+				}
+
+				function handleError(message) {
+					cli.error(message);
+				}
+
+				function handleResult(message) {
+					cli.result(message);
+				}
+
+				cli.log('Start building script');
+				cli.captn.runScript(handleLog, handleError, handleExit, handleResult);
 				process.exit(0);
 			}
 

@@ -8,6 +8,7 @@ function captn() {
 	this.hasError = false;
 	this.isReady = false;
 	this.configData = {};
+	this.scriptName = '';
 	this.scriptData = {};
 
 	try {
@@ -167,9 +168,11 @@ captn.prototype.loadScript = function(scriptName) {
 		result.success = false;
 		this.isReady = false;
 		this.hasError = true;
+		this.scriptName = '';
 		return result;
 	}
 
+	this.scriptName = scriptName;
 	this.isReady = true;
 	return result;
 };
@@ -216,56 +219,121 @@ captn.prototype.getScriptList = function(scriptName) {
  * Server
  *********************************************************************/
 
-captn.prototype.runScript = function() {
+captn.prototype.runScript = function(onLog, onError, onExit, onResult) {
 
-
-	var result = this.newResult();
-
+	// check error state
 	if (this.hasError) {
-		result.messages.push({message: 'Could not run script. Captn is in an error state', type: 'error'});
-		result.success = false;
-		return result;
+		onError('Could not run script. Captn is in an error state');
+		onExit(1);
+		return false;
 	}
 
+	// check if captn is ready
 	if (!this.isReady) {
-		result.messages.push({message: 'Could not run script. Captn is not ready to run', type: 'error'});
-		this.hasError = true;
-		result.success = false;
-		return result;
+		onError('Could not run script. Captn is not ready to run');
+		onExit(1);
+		return false;
 	}
 
+	// check if script data is loaded
 	if (!this.scriptData) {
-		result.messages.push({message: 'Could not run script. Script data is empty', type: 'error'});
-		result.success = false;
-		this.hasError = true;
-		return result;
+		onError('Could not run script. Script data is empty');
+		onExit(1);
+		return false;
 	}
 
+	// check is there are commands in script data
 	if (!this.scriptData.commands || this.scriptData.commands.length == 0) {
-		result.messages.push({message: 'No commands to run', type: 'error'});
-		result.success = false;
-		this.hasError = true;
-		return result;
+		onError('No commands to run');
+		onExit(1);
+		return false;
 	}
+
+	// delete previous script
+	var file = this.configData.script.path+this.scriptName+'.sh';
+	if (sd.fileExists(file)) {
+		onLog('Deleting previous script file "'+file+'"');
+		require('fs').unlinkSync(file);
+		if (sd.fileExists(file)) {
+			onError('File "'+file+'" cannot be deleted');
+			onExit(1);
+			return false;
+		}
+	}
+
+
+	var content = "#!/bin/bash\n\n";
+	var os = require("os");
+	content += "#######################################\n";
+	content += "# Captn - deploy script\n";
+	content += "#######################################\n";
+	content += "# Date: "+sd.getDateTime()+"\n";
+	content += "# Host: "+os.hostname()+"\n";
+	content += "# SSH user: "+this.scriptData.sshUser+" ("+this.getDefaultUsername()+")\n";
+	content += "# To server: "+this.scriptData.sshHost+"\n";
+	content += "#######################################\n";
+	content += "\n";
+	content += "\n";
 
 	try {
 		for (t=0; t<this.scriptData.commands.length; t++) {
-			var result = this.newResult();
-
-			result.messages.push({message: 'Running command '+(t+1)+" \""+this.getCommandLine(this.scriptData.commands[t])+"\"", type: 'log'});
+			content += "#######################################\n";
+			content += "# Command "+(t+1)+"\n";
 			if (this.scriptData.commands[t].skip) {
-				result.messages.push({message: 'Skipping command "'+this.scriptData.commands[t].exec+'"', type: 'warning'});
+				content += "# "+this.getCommandLine(this.scriptData.commands[t])+"\n";
+				content += "# Skip this command \n";
+				content += "\n";
 				continue;
 			}
-			this.runCommand(this.scriptData.commands[t], result);
+			content += this.getCommandLine(this.scriptData.commands[t])+"\n";
+			content += "if [ $? != 0 ]; then\n"
+			if (this.scriptData.commands[t].onError) {
+				content += "    (>&2 echo  \""+this.scriptData.commands[t].onError+"\")\n";
+			} else {
+				content += "    (>&2 echo \"Command failed. Aborting.\")\n";
+			}
+	    	content += "    exit 1;\n";
+			content += "fi\n";
+			if (this.scriptData.commands[t].onSuccess) {
+				content += "echo  \""+this.scriptData.commands[t].onSuccess+"\"\n";
+			}
+			content += "\n";
 		}
+
+		onLog('Writting script in file "'+file+'"');
+		require('fs').writeFileSync(file, content);
+
+		onLog('Running script');
+
+		var spawn = require('child_process').spawn,
+		    shell = spawn('sh', [file]),
+		    quit = false;
+
+		shell.stdout.on('data', function (data) {
+		  onResult(sd.trim(data.toString()));
+		});
+
+		shell.stderr.on('data', function (data) {
+		  onError(sd.trim(data.toString()));
+		});
+
+		shell.on('exit', function (code) {
+		  onExit(code);
+		  quit = true;
+		});
+
+		while (!quit) {
+		   require('deasync').sleep(100);
+		}
+
 	} catch (e) {
-		result.messages.push({message: e+'', type: 'error'});
-		result.success = false;
-		return result;
+		onError(e+'');
+		onExit(1);
+		return false;
 	}
 
-	return result;
+	onExit(0);
+	return false;
 };
 
 
