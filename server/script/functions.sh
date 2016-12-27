@@ -1,38 +1,3 @@
-#!/bin/bash
-
-#######################################
-# Captn - deploy script
-#######################################
-# Name: Synergie&vous API offre
-# Description: Synergie&vous API offre
-# Date: 2016-12-27 18:01:25
-# Local host: SYN1506
-# SSH user: root
-# SSH server: 213.56.106.169:22
-#######################################
-
-
-# Variables
-
-script_sh="C:\Users\PR033\git\captn\server\script\setv-api.dev.sh"
-script_name="setv-api.dev"
-script_json="C:\Users\PR033\git\captn\server\script\setv-api.dev.json"
-script_temp="C:\Users\PR033\git\captn\server\script\setv-api.dev"
-script_date="2016-12-27 18:01:25"
-script_local="SYN1506"
-script_warning="coucou"
-script_description="Synergie&vous API offre"
-script_delay="10"
-ssh_user="root"
-ssh_host="213.56.106.169"
-ssh_port="22"
-git_branch="develop"
-git_branch_remote=""
-git_user="07516"
-git_host="srv006.domsyn.fr"
-git_dir="/var/www/html/setv-recruteur/"
-
-
 
 # Functions
 
@@ -125,36 +90,4 @@ function captn_clone() {
 
 
 }
-
-#######################################
-# Command 1
-captn_start
-if [ $? != 0 ]; then
-    (>&2 echo "Command failed. Aborting.")
-    exit 1;
-fi
-
-#######################################
-# Command 2
-captn_clean
-if [ $? != 0 ]; then
-    (>&2 echo "Command failed. Aborting.")
-    exit 1;
-fi
-
-#######################################
-# Command 3
-captn_check
-if [ $? != 0 ]; then
-    (>&2 echo "Command failed. Aborting.")
-    exit 1;
-fi
-
-#######################################
-# Command 4
-captn_clone
-if [ $? != 0 ]; then
-    (>&2 echo "Command failed. Aborting.")
-    exit 1;
-fi
 

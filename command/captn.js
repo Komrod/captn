@@ -268,6 +268,9 @@ captn.prototype.runScript = function(onLog, onError, onExit, onResult) {
 	vars.script_temp = require('path').resolve(this.configData.script.path+this.scriptName+'/');
 	vars.script_date = sd.getDateTime();
 	vars.script_local = require("os").hostname();
+	vars.script_warning = this.scriptData.warning || '';
+	vars.script_description = this.scriptData.description || '';
+	vars.script_delay = parseInt(this.scriptData.delay) || 0;
 
 	vars.ssh_user = this.scriptData.sshUser || this.getDefaultUsername();
 	vars.ssh_host = this.scriptData.sshHost;
@@ -288,6 +291,8 @@ captn.prototype.runScript = function(onLog, onError, onExit, onResult) {
 	content += "#######################################\n";
 	content += "# Captn - deploy script\n";
 	content += "#######################################\n";
+	content += "# Name: "+vars.script_description+"\n";
+	content += "# Description: "+vars.script_description+"\n";
 	content += "# Date: "+vars.script_date+"\n";
 	content += "# Local host: "+vars.script_local+"\n";
 	content += "# SSH user: "+vars.ssh_user+"\n";
@@ -304,6 +309,15 @@ captn.prototype.runScript = function(onLog, onError, onExit, onResult) {
 	content += "\n";
 	content += "\n";
 
+	var function_file = require('path').resolve(this.configData.script.path+'functions.sh');
+	if (sd.fileExists(function_file)) {
+		content += require('fs').readFileSync(function_file);
+	}
+	var function_file = require('path').resolve(this.configData.script.path+'functions.custom.sh');
+	if (sd.fileExists(function_file)) {
+		content += require('fs').readFileSync(function_file);
+	}
+/*
 	content += "# Functions\n";
 	content += "\n";
 	content += "# Function to clean temporary directory and files\n";
@@ -342,11 +356,11 @@ captn.prototype.runScript = function(onLog, onError, onExit, onResult) {
 	if (vars.ssh_password == '') {
 		content += "		ssh -tt -p $ssh_port $ssh_user@$ssh_host \"cd "+vars.git_dir+" && git rev-parse --abbrev-ref HEAD\"\n";
 	} else {
-		content += "		echo \"$ssh_password\" | ssh -tt -p $ssh_port $ssh_user@$ssh_host \"cd "+vars.git_dir+" && git rev-parse --abbrev-ref HEAD\"\n";
+		content += "		echo \"$ssh_password\" | ssh -tt -p $ssh_port $ssh_user@$ssh_host \"cd "+vars.git_dir+" && git rev-parse --abbrev-ref HEAD && git rev-parse HEAD\"\n";
 	}
-	content += "	} > $script_temp/remote_branch.txt 2> /dev/null\n";
+	content += "	} > $script_temp/remote.txt 2> /dev/null\n";
 	content += "	return_code=$?\n";
-	content += "	if [ $(grep -c \"fatal\" $script_temp/remote_branch.txt) -ne 0 ]; then\n"
+	content += "	if [ $(grep -c \"fatal\" $script_temp/remote.txt) -ne 0 ]; then\n"
 	content += "		(>&2 cat $script_temp/remote_branch.txt)\n";
 	content += "		(>&2 echo \"captn_check: failed to get the remote branch name. Aborting.\")\n";
 	content += "		exit 1;\n";
@@ -355,19 +369,29 @@ captn.prototype.runScript = function(onLog, onError, onExit, onResult) {
 	content += "		(>&2 echo \"captn_check: failed to connect to SSH. Aborting.\")\n";
 	content += "		exit 1;\n";
 	content += "	fi\n";
-	content += "	git_branch_remote=`cat $script_temp/remote_branch.txt`\n";
+	content += "	git_branch_remote=`sed -n '2p' $script_temp/remote.txt`\n";
 	content += "	git_branch_remote=\"$(echo -e \"${git_branch_remote}\" | tr -d '[:space:]')\"\n";
+	content += "	git_commit=`sed -n '3p' $script_temp/remote.txt`\n";
+	content += "	git_commit=\"$(echo -e \"${git_commit}\" | tr -d '[:space:]')\"\n";
 content += "echo \"git_branch_remote = $git_branch_remote\"\n";	
 content += "echo \"git_branch = $git_branch\"\n";	
+content += "echo \"git_commit = $git_commit\"\n";
+	content += "	len=$(echo ${#git_commit})\n";
+content += "echo \"len = $len\"\n";
+	content += "	if [ \"$git_commit\" == \"\" ] || [ $len -ne 40 ]; then\n"
+	content += "		(>&2 echo \"captn_check: invalid commit id \\\"$git_commit\\\"\")\n";
+	content += "		exit 1;\n";
+	content += "	fi\n";
 	content += "	if [ \"$git_branch_remote\" != \"$git_branch\" ]; then\n"
 	content += "		(>&2 echo \"captn_check: server branch \\\"$git_branch_remote\\\" in \\\"$git_dir\\\" is supposed to be \\\"$git_branch\\\".\")\n";
 	content += "		exit 1;\n";
 	content += "	fi\n";
 	content += "	echo \"Success: actual server branch is \\\"$git_branch_remote\\\"\"\n";
+	content += "	echo \"Success: last commit is \\\"$git_commit\\\"\"\n";
 	content += "}\n";
 	content += "\n";
 	content += "\n";
-
+*/
 /*
 
 script_json: absolute path for the json file of the script

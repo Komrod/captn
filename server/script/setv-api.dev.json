@@ -1,20 +1,22 @@
 {
 	"description": "Synergie&vous API offre",
-	"warning" : "",
-	"delay": 0,
+	"warning" : "coucou",
+	"delay": 10,
 	"sshHost": "213.56.106.169",
 	"sshPort": "22",
 	"sshUser": "root",
 	"sshPassword": "hAku2ayu",
 	"gitHost": "srv006.domsyn.fr",
+	"gitProject": "d:/depotsGit/setv-api.git",
 	"gitUser": "07516",
 	"gitPassword": "Azerty789",
 	"gitBranch": "develop",
 	"gitCommit": "",
 	"gitDir": "/var/www/html/setv-recruteur/",
 	"commands": [
-		{"exec": "captn_start"},
-		{"exec": "captn_clean"},
-		{"exec": "captn_check"}
+		"captn_start",
+		"captn_clean",
+		"captn_check",
+		"captn_clone"
 	]
 }

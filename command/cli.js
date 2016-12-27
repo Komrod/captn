@@ -20,10 +20,8 @@ captn_cli.prototype.error = function(message) {
 };
 
 captn_cli.prototype.warning = function(message) {
-	if (this.program && this.program.verbose) {
-		const chalk = require('chalk');
-		console.log(chalk.styles.yellow.open + message + chalk.styles.yellow.close);
-	}
+	const chalk = require('chalk');
+	console.log(chalk.styles.yellow.open + message + chalk.styles.yellow.close);
 };
 
 captn_cli.prototype.log = function(message, noColors) {
@@ -187,11 +185,18 @@ captn_cli.prototype.run = function() {
 				}
 
 				function handleLog(message) {
+					var res = message.split("\n");
+					if (res.length > 1) {
+						for (var t=0; t<res.length; t++) {
+							handleLog(res[t]);
+						}
+						return;
+					}
 					if (sd.startsWith(sd.trim(message), 'Success:')) {
 						cli.success(message);
-					} else if (sd.startsWith(message, 'Warning:')){
+					} else if (sd.startsWith(sd.trim(message), 'Warning:')){
 						cli.warning(message);
-					} else if (sd.startsWith(message, 'Error:')){
+					} else if (sd.startsWith(sd.trim(message), 'Error:')){
 						cli.error(message);
 					} else {
 						cli.log(message);
@@ -199,15 +204,29 @@ captn_cli.prototype.run = function() {
 				}
 
 				function handleError(message) {
+					var res = message.split("\n");
+					if (res.length > 1) {
+						for (var t=0; t<res.length; t++) {
+							handleError(res[t]);
+						}
+						return;
+					}
 					cli.error(message);
 				}
 
 				function handleResult(message) {
+					var res = message.split("\n");
+					if (res.length > 1) {
+						for (var t=0; t<res.length; t++) {
+							handleResult(res[t]);
+						}
+						return;
+					}
 					if (sd.startsWith(sd.trim(message), 'Success:')) {
 						cli.success(message);
-					} else if (sd.startsWith(message, 'Warning:')){
+					} else if (sd.startsWith(sd.trim(message), 'Warning:')){
 						cli.warning(message);
-					} else if (sd.startsWith(message, 'Error:')){
+					} else if (sd.startsWith(sd.trim(message), 'Error:')){
 						cli.error(message);
 					} else {
 						if (cli.program.verbose) {
