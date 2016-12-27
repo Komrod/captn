@@ -3,6 +3,8 @@ Easy web server production deployment
 
 
 TODO:
+- connect SSH with public and private keys
+- multiple actions in one script
 - Continue on error
 - Show warning message at startup
 - Wait for delay at startup
@@ -53,7 +55,28 @@ captn_check: function to check if git branch is ready
 captn_patch: function to get the patch between the 2 branches
 captn_deploy: function to apply patch to 
 
-Git:
+Git example:
 git rev-parse HEAD // get last commit id
 git log edcfc6184b5cb30e29c0da3ccdec296379d3c7b8..0efeb3800396e15717b4f15fb572f5886fa49c50  --pretty=format:"%H - %cn, %ad : %s" // get list of commits to update
+git cat-file -t 0efeb3800396e15717b4f15fb572f5886fa49c51 // check if commit exists
+
+
+Steps:
+# Start
+- infos about the script
+- warning
+- delay before continue
+# clean
+- delete temp dir and files
+# check
+- connect to server by SSH
+- get branch and last commit
+- local: init git to HEAD of branch
+- local: choose the commit id to update to
+- local: get the log list of commits to update
+- local: update to selected commit and finish
+# deploy
+- connect to server by SSH 
+- update to selected commit
+
 
