@@ -24,19 +24,15 @@ captn_cli.prototype.warning = function(message) {
 	console.log(chalk.styles.yellow.open + message + chalk.styles.yellow.close);
 };
 
-captn_cli.prototype.log = function(message, noColors) {
-	if (this.program && this.program.verbose) {
+captn_cli.prototype.log = function(message, force) {
+	if (this.program && this.program.verbose || force) {
 		const chalk = require('chalk');
-		if (noColors) {
-			console.log(message);
-		} else {
-			console.log(chalk.styles.gray.open + message + chalk.styles.gray.close);
-		}
+		console.log(chalk.styles.gray.open + message + chalk.styles.gray.close);
 	}
 };
 
-captn_cli.prototype.info = function(message) {
-	if (this.program && this.program.verbose) {
+captn_cli.prototype.info = function(message, force) {
+	if (this.program && this.program.verbose || force) {
 		const chalk = require('chalk');
 		console.log(chalk.styles.cyan.open + message + chalk.styles.cyan.close);
 	}
@@ -198,6 +194,8 @@ captn_cli.prototype.run = function() {
 						cli.warning(message);
 					} else if (sd.startsWith(sd.trim(message), 'Error:')){
 						cli.error(message);
+					} else if (sd.endsWith(sd.trim(message), '?')){
+						cli.info(message, true);
 					} else {
 						cli.log(message);
 					}
@@ -228,6 +226,8 @@ captn_cli.prototype.run = function() {
 						cli.warning(message);
 					} else if (sd.startsWith(sd.trim(message), 'Error:')){
 						cli.error(message);
+					} else if (sd.endsWith(sd.trim(message), '?')){
+						cli.info(message, true);
 					} else {
 						if (cli.program.verbose) {
 							cli.result(message);

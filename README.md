@@ -11,7 +11,10 @@ TODO:
 - error check step
 - update in server step
 
+
 DONE:
+- show questions
+- redirect stdin
 - optional skip command
 - Delay before continuing at startup
 - Make the variables

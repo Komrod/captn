@@ -282,6 +282,7 @@ captn.prototype.runScript = function(onLog, onError, onExit, onResult) {
 	vars.git_user = this.scriptData.gitUser || this.getDefaultUsername();
 	vars.git_host = this.scriptData.gitHost;
 	vars.git_dir = this.scriptData.gitDir;
+	vars.git_repo = this.scriptData.gitRepo;
 
 	for(var name in vars) {
 		content += name+"=\""+vars[name]+"\"\n";
@@ -291,12 +292,15 @@ captn.prototype.runScript = function(onLog, onError, onExit, onResult) {
 	content += "#######################################\n";
 	content += "# Captn - deploy script\n";
 	content += "#######################################\n";
-	content += "# Name: "+vars.script_description+"\n";
+	content += "# Name: "+vars.script_name+"\n";
 	content += "# Description: "+vars.script_description+"\n";
 	content += "# Date: "+vars.script_date+"\n";
 	content += "# Local host: "+vars.script_local+"\n";
 	content += "# SSH user: "+vars.ssh_user+"\n";
 	content += "# SSH server: "+vars.ssh_host+":"+vars.ssh_port+"\n";
+	content += "# GIT user: "+vars.git_user+"\n";
+	content += "# GIT repository: "+vars.git_repo+"\n";
+	content += "# Target dir: "+vars.git_dir+"\n";
 	content += "#######################################\n";
 	content += "\n";
 	content += "\n";
@@ -458,6 +462,8 @@ captn_deploy: function to apply patch to
 		var spawn = require('child_process').spawn,
 		    shell = spawn(this.configData.script.shell || 'bash', [vars.script_sh]),
 		    quit = false;
+
+		process.stdin.pipe(shell.stdin, { end: false });
 
 		shell.stdout.on('data', function (data) {
 		  onResult(sd.trim(data.toString()));

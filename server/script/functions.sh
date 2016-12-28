@@ -85,8 +85,30 @@ function captn_check() {
 	echo "Success: last commit is \"$git_commit\""
 }
 
+
 function captn_clone() {
 	echo "captn_clone: cloning depository"
+	cd "$script_temp"
+	if [ $? != 0 ]; then
+	    (>&2 echo "Could not change dir to \"$script_temp\". Aborting.")
+	    exit 1;
+	fi
+	git clone $git_user@$git_host:$git_repo clone
+	if [ $? != 0 ]; then
+	    (>&2 echo "Could not clone project \"$git_repo\". Aborting.")
+	    exit 1;
+	fi
+	cd "$script_temp/clone"
+	if [ $? != 0 ]; then
+	    (>&2 echo "Could not change dir to \"$script_temp/clone/\". Aborting.")
+	    exit 1;
+	fi
+	echo "Success: repository cloned"
+	git branch $git_branch
+	if [ $? != 0 ]; then
+	    (>&2 echo "Could not change to branch \"$git_branch\". Aborting.")
+	    exit 1;
+	fi
 
 
 }

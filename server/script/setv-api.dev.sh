@@ -3,26 +3,29 @@
 #######################################
 # Captn - deploy script
 #######################################
-# Name: Synergie&vous API offre
+# Name: setv-api.dev
 # Description: Synergie&vous API offre
-# Date: 2016-12-27 18:01:25
-# Local host: SYN1506
+# Date: 2016-12-28 04:46:32
+# Local host: Thierry-PC
 # SSH user: root
 # SSH server: 213.56.106.169:22
+# GIT user: 07516
+# GIT repository: d:/depotsGit/setv-api.git
+# Target dir: /var/www/html/setv-recruteur/
 #######################################
 
 
 # Variables
 
-script_sh="C:\Users\PR033\git\captn\server\script\setv-api.dev.sh"
+script_sh="C:\Users\Thierry\git\captn\server\script\setv-api.dev.sh"
 script_name="setv-api.dev"
-script_json="C:\Users\PR033\git\captn\server\script\setv-api.dev.json"
-script_temp="C:\Users\PR033\git\captn\server\script\setv-api.dev"
-script_date="2016-12-27 18:01:25"
-script_local="SYN1506"
+script_json="C:\Users\Thierry\git\captn\server\script\setv-api.dev.json"
+script_temp="C:\Users\Thierry\git\captn\server\script\setv-api.dev"
+script_date="2016-12-28 04:46:32"
+script_local="Thierry-PC"
 script_warning="coucou"
 script_description="Synergie&vous API offre"
-script_delay="10"
+script_delay="0"
 ssh_user="root"
 ssh_host="213.56.106.169"
 ssh_port="22"
@@ -31,6 +34,7 @@ git_branch_remote=""
 git_user="07516"
 git_host="srv006.domsyn.fr"
 git_dir="/var/www/html/setv-recruteur/"
+git_repo="d:/depotsGit/setv-api.git"
 
 
 
@@ -120,8 +124,30 @@ function captn_check() {
 	echo "Success: last commit is \"$git_commit\""
 }
 
+
 function captn_clone() {
 	echo "captn_clone: cloning depository"
+	cd "$script_temp"
+	if [ $? != 0 ]; then
+	    (>&2 echo "Could not change dir to \"$script_temp\". Aborting.")
+	    exit 1;
+	fi
+	git clone $git_user@$git_host:$git_repo clone
+	if [ $? != 0 ]; then
+	    (>&2 echo "Could not clone project \"$git_repo\". Aborting.")
+	    exit 1;
+	fi
+	cd "$script_temp/clone"
+	if [ $? != 0 ]; then
+	    (>&2 echo "Could not change dir to \"$script_temp/clone/\". Aborting.")
+	    exit 1;
+	fi
+	echo "Success: repository cloned"
+	git branch $git_branch
+	if [ $? != 0 ]; then
+	    (>&2 echo "Could not change to branch \"$git_branch\". Aborting.")
+	    exit 1;
+	fi
 
 
 }
@@ -144,11 +170,8 @@ fi
 
 #######################################
 # Command 3
-captn_check
-if [ $? != 0 ]; then
-    (>&2 echo "Command failed. Aborting.")
-    exit 1;
-fi
+# captn_check
+# Skip this command 
 
 #######################################
 # Command 4
