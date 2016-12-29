@@ -271,6 +271,7 @@ captn.prototype.runScript = function(onLog, onError, onExit, onResult) {
 	vars.script_warning = this.scriptData.warning || '';
 	vars.script_description = this.scriptData.description || '';
 	vars.script_delay = parseInt(this.scriptData.delay) || 0;
+	vars.script_true_values = this.configData.script.trueValues.join(' ');
 
 	vars.ssh_user = this.scriptData.sshUser || this.getDefaultUsername();
 	vars.ssh_host = this.scriptData.sshHost;
@@ -283,6 +284,9 @@ captn.prototype.runScript = function(onLog, onError, onExit, onResult) {
 	vars.git_host = this.scriptData.gitHost;
 	vars.git_dir = this.scriptData.gitDir;
 	vars.git_repo = this.scriptData.gitRepo;
+	vars.git_commit_limit = this.scriptData.gitCommitLimit;
+
+	//vars.result = "";
 
 	for(var name in vars) {
 		content += name+"=\""+vars[name]+"\"\n";
@@ -315,11 +319,11 @@ captn.prototype.runScript = function(onLog, onError, onExit, onResult) {
 
 	var function_file = require('path').resolve(this.configData.script.path+'functions.sh');
 	if (sd.fileExists(function_file)) {
-		content += require('fs').readFileSync(function_file);
+		content += require('fs').readFileSync(function_file)+"\n";
 	}
 	var function_file = require('path').resolve(this.configData.script.path+'functions.custom.sh');
 	if (sd.fileExists(function_file)) {
-		content += require('fs').readFileSync(function_file);
+		content += require('fs').readFileSync(function_file)+"\n";
 	}
 /*
 	content += "# Functions\n";
@@ -444,7 +448,7 @@ captn_deploy: function to apply patch to
 			if (this.scriptData.commands[t].onError) {
 				content += "    (>&2 echo  \""+this.scriptData.commands[t].onError+"\")\n";
 			} else {
-				content += "    (>&2 echo \"Command failed. Aborting.\")\n";
+				content += "    (>&2 echo \"Command failed. Aborting\")\n";
 			}
 	    	content += "    exit 1;\n";
 			content += "fi\n";
@@ -463,7 +467,12 @@ captn_deploy: function to apply patch to
 		    shell = spawn(this.configData.script.shell || 'bash', [vars.script_sh]),
 		    quit = false;
 
-		process.stdin.pipe(shell.stdin, { end: false });
+		if (!shell) {
+			onError("Could not open shell. Aborting");
+			onExit(1);
+		}
+		
+		process.stdin.pipe(shell.stdin);
 
 		shell.stdout.on('data', function (data) {
 		  onResult(sd.trim(data.toString()));

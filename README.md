@@ -1,18 +1,42 @@
 # captn
+
 Easy web server production deployment
 
 
-TODO:
+## TODO
+
 - multiple actions in one script
 - one action for every step
 - Continue on error
-- Declare variables server side in SSH
-- cloning step
+- ignore log of some strings with regex
 - error check step
-- update in server step
+- update remote server step
+- optional choose bash command in captn config
+- optional choose ssh command in captn config
+- optional generate archive in remote in script config
+- if in command option
+- skip checking remote commit if git_commit_remote is filled
+- script warning on multiple lines
+- pass program parameters to script
+- show commits with current colored in captn_commit
+- cli "-y" option to say yes to everything in batch mode
+- function to ask a response on a selected list
+- generate and store the diff of the code
+- optional generate changelog in captn config
+- optional generate difflog in captn config
+- console show default answer when pressing enter in acptn_ask
+- dont delete the cloned repository of the script
+- make an action to clean everything, even the cloned directory
+- action to test SSH
+- lint the shell scripts before running
 
 
-DONE:
+## DONE
+
+- message "press [ctrl-c] at any time to quit"
+- function to ask if you want to continue
+- function to ask a question
+- cloning step
 - show questions
 - redirect stdin
 - optional skip command
@@ -24,8 +48,7 @@ DONE:
 - Show warning in yellow and success in green
 
 
-
-In commands:
+## In shell
 
 script_json: absolute path for the json file of the script
 script_sh: absolute path for the sh file of the script
@@ -36,8 +59,10 @@ script_temp: temporary directory for the script
 
 git_host:
 git_user:
-git_branch_from:
-git_branch_to:
+git_branch_remote:
+git_branch:
+git_commit:
+git_commit_remote:
 
 ssh_host:
 ssh_port:
@@ -51,10 +76,11 @@ captn_dir: root directory of captn
 captn_version: version of captn
 
 
-true values: "y", "Y", "yes", "Yes", "YES", "1", "true"
+true values: "y", "Y", "yes", "Yes", "YES", "1", "true", "ok", "yep"
 
 
-Functions:
+## Functions
+
 captn_start: function to display informations, warning at startup
 captn_clean: function to clean temporary directory and files
 captn_check: function to check if git branch is ready
@@ -62,31 +88,50 @@ captn_patch: function to get the patch between the 2 branches
 captn_deploy: function to apply patch to 
 
 
-Git example:
-git rev-parse HEAD // get last commit id
-git log edcfc6184b5cb30e29c0da3ccdec296379d3c7b8..0efeb3800396e15717b4f15fb572f5886fa49c50  --pretty=format:"%H - %cn, %ad : %s" // get list of commits to update
-git cat-file -t 0efeb3800396e15717b4f15fb572f5886fa49c51 // check if commit exists
+## Git example
+
+```
+	git rev-parse HEAD 
+	# get last commit id
+	
+	git log edcfc6184b5cb30e29c0da3ccdec296379d3c7b8..0efeb3800396e15717b4f15fb572f5886fa49c50  --pretty=format:"%H - %cn, %ad : %s" 
+	# get list of commits to update
+	
+	git cat-file -t 0efeb3800396e15717b4f15fb572f5886fa49c51 
+	# check if commit exists
+```
 
 
-Steps:
-# Start
+## Steps:
+
+### Start
 - infos about the script
 - warning
 - delay before continue
-# clean
+
+### clean
 - delete temp dir and files
-# check server
+
+### check remote server
 - connect to server by SSH
 - get branch and last commit
-# clone
+
+### local clone
 - init git to HEAD of branch
 - choose the commit id to update to
 - get the log list of commits to update
 - update to selected commit
-# check for errors
+
+### check for errors
 - lint
-# deploy
+
+### deploy
+- generate changlog
 - connect to server by SSH 
 - update to selected commit
+- update other files
+- empty cache
 
+### finish
+- check some urls
 

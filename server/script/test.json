@@ -1,0 +1,27 @@
+{
+	"description": "Synergie&vous API offre",
+	"warning" : "coucou",
+	"delay": 0,
+	"sshHost": "213.56.106.169",
+	"sshPort": "22",
+	"sshUser": "root",
+	"gitHost": "srv006.domsyn.fr",
+	"gitRepo": "d:/depotsGit/setv-api.git",
+	"gitUser": "07516",
+	"gitBranch": "develop",
+	"gitCommit": "",
+	"gitDir": "/var/www/html/setv-api/",
+	"gitCommitLimit": 10,
+	"commands": [
+		{"exec": "captn_start", "skip": false},
+		{"exec": "captn_clean", "skip": false},
+		{"exec": "captn_check_remote", "skip": false},
+		{"exec": "captn_clone_local", "skip": false},
+		{"exec": "captn_deploy_local", "skip": false},
+		{"exec": "captn_verify_local", "skip": false},
+		{"exec": "captn_update_remote", "skip": false},
+		{"exec": "captn_deploy_remote", "skip": false},
+		{"exec": "captn_verify_remote", "skip": false},
+		{"exec": "captn_finish", "skip": false}
+	]
+}

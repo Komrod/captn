@@ -5,18 +5,23 @@
 	"sshHost": "213.56.106.169",
 	"sshPort": "22",
 	"sshUser": "root",
-	"sshPassword": "hAku2ayu",
 	"gitHost": "srv006.domsyn.fr",
 	"gitRepo": "d:/depotsGit/setv-api.git",
 	"gitUser": "07516",
-	"gitPassword": "Azerty789",
 	"gitBranch": "develop",
 	"gitCommit": "",
+	"gitCommitLimit": 10,
 	"gitDir": "/var/www/html/setv-recruteur/",
 	"commands": [
 		{"exec": "captn_start", "skip": false},
 		{"exec": "captn_clean", "skip": false},
 		{"exec": "captn_check", "skip": true},
-		{"exec": "captn_clone", "skip": false}
+		{"exec": "captn_clone", "skip": false},
+
+		{"exec": "captn_ask \"Somebody once told me\" yes", "skip": true},
+		{"exec": "captn_yes $response", "skip": true},
+		{"exec": "if [ \"$(captn_yes $response)\" == \"1\" ]; then echo \"yessssss 1\"; fi", "skip": true},
+		{"exec": "if [ $(captn_yes $response) -eq 1 ]; then echo \"yessssss 2\"; fi", "skip": true},
+		{"if": "$(captn_yes $response) -eq 1", "exec": "echo \"yessssss 3\"", "skip": true}
 	]
 }

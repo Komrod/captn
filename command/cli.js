@@ -238,6 +238,7 @@ captn_cli.prototype.run = function() {
 				}
 
 				cli.result('Start script');
+				cli.log('Press [ctrl-c] at any time to quit');
 				cli.captn.runScript(handleLog, handleError, handleExit, handleResult);
 				process.exit(0);
 			}

@@ -3,25 +3,25 @@
 #######################################
 # Captn - deploy script
 #######################################
-# Name: setv-api.dev
+# Name: test
 # Description: Synergie&vous API offre
-# Date: 2016-12-29 17:21:26
+# Date: 2016-12-29 18:23:59
 # Local host: SYN1506
 # SSH user: root
 # SSH server: 213.56.106.169:22
 # GIT user: 07516
 # GIT repository: d:/depotsGit/setv-api.git
-# Target dir: /var/www/html/setv-recruteur/
+# Target dir: /var/www/html/setv-api/
 #######################################
 
 
 # Variables
 
-script_sh="C:\Users\PR033\git\captn\server\script\setv-api.dev.sh"
-script_name="setv-api.dev"
-script_json="C:\Users\PR033\git\captn\server\script\setv-api.dev.json"
-script_temp="C:\Users\PR033\git\captn\server\script\setv-api.dev"
-script_date="2016-12-29 17:21:26"
+script_sh="C:\Users\PR033\git\captn\server\script\test.sh"
+script_name="test"
+script_json="C:\Users\PR033\git\captn\server\script\test.json"
+script_temp="C:\Users\PR033\git\captn\server\script\test"
+script_date="2016-12-29 18:23:59"
 script_local="SYN1506"
 script_warning="coucou"
 script_description="Synergie&vous API offre"
@@ -34,7 +34,7 @@ git_branch="develop"
 git_branch_remote=""
 git_user="07516"
 git_host="srv006.domsyn.fr"
-git_dir="/var/www/html/setv-recruteur/"
+git_dir="/var/www/html/setv-api/"
 git_repo="d:/depotsGit/setv-api.git"
 git_commit_limit="10"
 
@@ -102,40 +102,46 @@ function captn_clean() {
 
 
 # Function to check remote server by SSH
-function captn_remote() {
-	echo "captn_check: getting branch from server"
-	echo "captn_check: connecting to $ssh_host:$ssh_port"
+function captn_check_remote() {
+	echo "captn_check_remote: getting branch from remote server"
+	echo "captn_check_remote: connecting to $ssh_host:$ssh_port"
 	{
-		echo "$ssh_password" | ssh -tt -p $ssh_port $ssh_user@$ssh_host "cd $git_dir && git rev-parse --abbrev-ref HEAD && git rev-parse HEAD"
+		ssh -tt -p $ssh_port $ssh_user@$ssh_host "cd $git_dir && git rev-parse --abbrev-ref HEAD && git rev-parse HEAD"
 	} > $script_temp/remote.txt 2> /dev/null
 	return_code=$?
 	if [ $(grep -c "fatal" $script_temp/remote.txt) -ne 0 ]; then
 		(>&2 cat $script_temp/remote_branch.txt)
-		(>&2 echo "captn_check: failed to get the remote branch name. Aborting")
+		(>&2 echo "captn_check_remote: failed to get the remote branch name. Aborting")
 		exit 1;
 	fi
 	if [ $return_code -ne 0 ]; then
-		(>&2 echo "captn_check: failed to connect to SSH. Aborting.")
+		(>&2 echo "captn_check_remote: failed to connect to SSH. Aborting.")
 		exit 1;
 	fi
-	git_branch_remote=`sed -n '2p' $script_temp/remote.txt`
-	git_branch_remote="$(echo -e "${git_branch_remote}" | tr -d '[:space:]')"
-	git_commit_remote=`sed -n '3p' $script_temp/remote.txt`
-	git_commit_remote="$(echo -e "${git_commit_remote}" | tr -d '[:space:]')"
+	# TODO apparently sometimes the first line is empty, must be sure
+	line=1
+	sed -n ${line}p $script_temp/remote.txt
+	first_line=`sed -n ${line}p $script_temp/remote.txt`
+	if [ "$first_line" == "" ]; then
+		line=2
+		first_line=`sed -n ${line}p $script_temp/remote.txt`
+	fi
+	git_branch_remote="$first_line" # `sed -n ${line}p $script_temp/remote.txt`
+	line="$(($line+1))"
+	git_commit_remote=`sed -n ${line}p $script_temp/remote.txt`
 #echo "git_branch_remote = $git_branch_remote"
 #echo "git_commit_remote = $git_commit_remote"
 	len=$(echo ${#git_commit_remote})
-#echo "len = $len"
 	if [ "$git_commit_remote" == "" ] || [ $len -ne 40 ]; then
-		(>&2 echo "captn_check: invalid commit id \"$git_commit_remote\"")
+		(>&2 echo "captn_check_remote: invalid commit id \"$git_commit_remote\"")
 		exit 1;
 	fi
 	if [ "$git_branch_remote" != "$git_branch" ]; then
-		(>&2 echo "captn_check: server branch \"$git_branch_remote\" in \"$git_dir\" is supposed to be \"$git_branch\".")
+		(>&2 echo "captn_check_remote: server branch \"$git_branch_remote\" in \"$git_dir\" is supposed to be \"$git_branch\".")
 		exit 1;
 	fi
 	echo "Success: remote server branch is \"$git_branch_remote\""
-	echo "Success: remote last commit is \"$git_commit_remote\""
+	echo "Success: remote server last commit is \"$git_commit_remote\""
 }
 
 
@@ -147,7 +153,7 @@ function captn_clone_local() {
 
 	############################################
 	# cloning
-	echo "captn_clone: cloning depository"
+	echo "captn_clone_local: start"
 	cd "$script_temp"
 	if [ $? != 0 ]; then
 	    (>&2 echo "Could not change dir to \"$script_temp\". Aborting")
@@ -175,7 +181,7 @@ function captn_clone_local() {
 	############################################
 	# branch
 	if [ "$git_branch_current" != "$git_branch" ]; then
-		echo "captn_clone: changing branch"
+		echo "captn_clone_local: changing branch"
 		result=$( (git checkout $git_branch) 2> /dev/null )
 		if [ $? != 0 ]; then
 		    (>&2 echo "$result")
@@ -211,7 +217,7 @@ function captn_clone_local() {
 		echo "$commits"
 		captn_commit $commit_head
 	fi
-	echo "captn_clone: using commit id \"$git_commit\""
+	echo "captn_clone_local: using commit id \"$git_commit\""
 
 	############################################
 	# generate changelog
@@ -224,7 +230,7 @@ function captn_clone_local() {
 		    echo "Warning: targeted commit id \"$git_commit\" is already on the server"
 		    captn_ask_continue
 		else
-			echo "captn_clone: generating changelog"
+			echo "captn_clone_local: generating changelog"
 			git log $git_commit_remote..$git_commit --pretty=format:"%H - %cn, %ad : %s"  > $script_temp/changelog.md
 			if [ $? != 0 ]; then
 			    echo "Warning: could not generate changelog in \"$script_temp/changelog.txt\""
@@ -239,7 +245,7 @@ function captn_clone_local() {
 		fi
 	fi
 
-	echo "captn_clone: updating local repository to commit \"$git_commit\""
+	echo "captn_clone_local: updating local repository to commit \"$git_commit\""
 	result=$( (git reset $git_commit --hard) 2> /dev/null )
 	if [ $? != 0 ]; then
 		(>&2 echo "$result")
@@ -255,6 +261,7 @@ function captn_clone_local() {
 
 
 function captn_deploy_local() {
+	echo "captn_deploy_local: start"
 	root="$script_temp/clone/"
 
 	# compoer update / install
@@ -266,6 +273,7 @@ function captn_deploy_local() {
 
 
 function captn_verify_local() {
+	echo "captn_verify_local: start"
 	root="$script_temp/clone/"
 
 	# lint some files
@@ -277,9 +285,41 @@ function captn_verify_local() {
 
 
 function captn_deploy_remote() {
+	echo "captn_deploy_remote: start"
 	root="$git_dir/"
 
 	# compoer update / install
+}
+
+
+#################################################
+# update remote
+
+
+function captn_update_remote() {
+	
+	captn_ask "Do you really want to deploy to the remote server" "no"
+	if [ "$()" == "0" ]; then
+	    (>&2 echo "User choose to Abort")
+    	exit 1;
+	fi
+
+	echo "captn_update_remote: connecting to $ssh_host:$ssh_port"
+	{
+		ssh -tt -p $ssh_port $ssh_user@$ssh_host "cd $git_dir && git reset $git_commit --hard"
+	} > $script_temp/remote_update.txt 2> /dev/null
+	return_code=$?
+	if [ $(grep -c "fatal" $script_temp/remote.txt) -ne 0 ]; then
+		(>&2 cat $script_temp/remote_branch.txt)
+		(>&2 echo "captn_update_remote: failed to update the remote server. Aborting")
+		exit 1;
+	fi
+	if [ $return_code -ne 0 ]; then
+		(>&2 echo "captn_update_remote: failed to connect to SSH. Aborting.")
+		exit 1;
+	fi
+
+	echo "Success: remote server updated"
 }
 
 
@@ -288,6 +328,7 @@ function captn_deploy_remote() {
 
 
 function captn_verify_remote() {
+	echo "captn_verify_remote: start"
 	root="$git_dir/"
 
 	# lint some files
@@ -298,6 +339,8 @@ function captn_verify_remote() {
 # Deploy
 
 function captn_finish() {
+	echo "capt_finish: start"
+	# finish
 
 }
 
@@ -402,12 +445,15 @@ fi
 
 #######################################
 # Command 3
-# captn_check
-# Skip this command 
+captn_check_remote
+if [ $? != 0 ]; then
+    (>&2 echo "Command failed. Aborting")
+    exit 1;
+fi
 
 #######################################
 # Command 4
-captn_clone
+captn_clone_local
 if [ $? != 0 ]; then
     (>&2 echo "Command failed. Aborting")
     exit 1;
@@ -415,26 +461,49 @@ fi
 
 #######################################
 # Command 5
-# captn_ask "Somebody once told me" yes
-# Skip this command 
+captn_deploy_local
+if [ $? != 0 ]; then
+    (>&2 echo "Command failed. Aborting")
+    exit 1;
+fi
 
 #######################################
 # Command 6
-# captn_yes $response
-# Skip this command 
+captn_verify_local
+if [ $? != 0 ]; then
+    (>&2 echo "Command failed. Aborting")
+    exit 1;
+fi
 
 #######################################
 # Command 7
-# if [ "$(captn_yes $response)" == "1" ]; then echo "yessssss 1"; fi
-# Skip this command 
+captn_update_remote
+if [ $? != 0 ]; then
+    (>&2 echo "Command failed. Aborting")
+    exit 1;
+fi
 
 #######################################
 # Command 8
-# if [ $(captn_yes $response) -eq 1 ]; then echo "yessssss 2"; fi
-# Skip this command 
+captn_deploy_remote
+if [ $? != 0 ]; then
+    (>&2 echo "Command failed. Aborting")
+    exit 1;
+fi
 
 #######################################
 # Command 9
-# echo "yessssss 3"
-# Skip this command 
+captn_verify_remote
+if [ $? != 0 ]; then
+    (>&2 echo "Command failed. Aborting")
+    exit 1;
+fi
+
+#######################################
+# Command 10
+captn_finish
+if [ $? != 0 ]; then
+    (>&2 echo "Command failed. Aborting")
+    exit 1;
+fi
 

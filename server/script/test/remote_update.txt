@@ -1,0 +1,1 @@
+HEAD is now at af08a57 Refactor query to display all validate offers by site
