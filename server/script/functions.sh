@@ -1,4 +1,7 @@
 
+
+
+
 #################################################
 #################################################
 # Functions
@@ -34,9 +37,9 @@ function captn_start() {
 # Clean
 
 
-# Function to clean temporary files
+# Function to clean local temporary files
 function captn_clean() {
-	echo "captn_clean: Start cleaning directory"
+	echo "captn_clean: Start cleaning"
 	echo "captn_clean: script temp directory is \"$script_temp\""
 	echo "captn_clean: deleting directory"
 	rm -fr "$script_temp"
@@ -223,7 +226,20 @@ function captn_deploy_local() {
 	echo "captn_deploy_local: start"
 	root="$script_temp/clone/"
 
-	# compoer update / install
+	# composer update / install
+	if [ "$use_deploy_composer" == "1" ]; then;
+		captn_composer $root
+	fi
+
+	# enable drupal 7/8 drush
+	if [ "$use_deploy_drush_enable" == "1" ]; then;
+		captn_drush_enable $root
+	fi
+	
+	# empty drupal 7/8 cache
+	if [ "$use_deploy_empty_cache" == "1" ]; then;
+		captn_drush_empty_cache $root
+	fi
 }
 
 

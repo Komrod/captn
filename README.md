@@ -5,34 +5,42 @@ Easy web server production deployment
 
 ## TODO
 
+- have "use_" variables instead of "skip_"
+- pass to shell all the variables inside script config except object
 - multiple actions in one script
-- one action for every step
-- Continue on error
-- ignore log of some strings with regex
+- create one action for every step
+- extend script actions from default captn actions
 - error check step
 - update remote server step
 - optional choose bash command in captn config
 - optional choose ssh command in captn config
 - optional generate archive in remote in script config
+- optional generate changelog in captn config
+
+- Continue on error command option
 - if in command option
-- skip checking remote commit if git_commit_remote is filled
-- script warning on multiple lines
 - pass program parameters to script
-- show commits with current colored in captn_commit
+
 - cli "-y" option to say yes to everything in batch mode
 - function to ask a response on a selected list
 - generate and store the diff of the code
-- optional generate changelog in captn config
 - optional generate difflog in captn config
 - console show default answer when pressing enter in acptn_ask
 - dont delete the cloned repository of the script
 - make an action to clean everything, even the cloned directory
 - action to test SSH
 - lint the shell scripts before running
+- command to build script
+- put colors directly in script
+- describe main actions and sub actions in readme
+- show commits with current colored in captn_commit
+- script warning on multiple lines
+- ignore log of some strings with regex
 
 
 ## DONE
 
+- skip checking remote commit if git_commit_remote is filled
 - message "press [ctrl-c] at any time to quit"
 - function to ask if you want to continue
 - function to ask a question

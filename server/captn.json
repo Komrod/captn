@@ -3,8 +3,8 @@
 	"script":
 	{
 		"path": "script/",
-		"shell": "bash",
-		"trueValues": ["y", "Y", "yes", "Yes", "YES", "1", "true", "ok", "yep"]
+		"true_values": ["y", "Y", "yes", "Yes", "YES", "1", "true", "ok", "yep"],
+		"includes": ["functions.captn.sh"],
 	},
 	"log":
 	{

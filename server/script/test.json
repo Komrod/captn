@@ -2,26 +2,102 @@
 	"description": "Synergie&vous API offre",
 	"warning" : "coucou",
 	"delay": 0,
-	"sshHost": "213.56.106.169",
-	"sshPort": "22",
-	"sshUser": "root",
-	"gitHost": "srv006.domsyn.fr",
-	"gitRepo": "d:/depotsGit/setv-api.git",
-	"gitUser": "07516",
-	"gitBranch": "develop",
-	"gitCommit": "",
-	"gitDir": "/var/www/html/setv-api/",
-	"gitCommitLimit": 10,
-	"commands": [
-		{"exec": "captn_start", "skip": false},
-		{"exec": "captn_clean", "skip": false},
-		{"exec": "captn_check_remote", "skip": false},
-		{"exec": "captn_clone_local", "skip": false},
-		{"exec": "captn_deploy_local", "skip": false},
-		{"exec": "captn_verify_local", "skip": false},
-		{"exec": "captn_update_remote", "skip": false},
-		{"exec": "captn_deploy_remote", "skip": false},
-		{"exec": "captn_verify_remote", "skip": false},
-		{"exec": "captn_finish", "skip": false}
-	]
+	
+	"ssh_host": "213.56.106.169",
+	"ssh_port": "22",
+	"ssh_user": "root",
+	
+	"git_host": "srv006.domsyn.fr",
+	"git_repo": "d:/depotsGit/setv-api.git",
+	"git_user": "07516",
+	"git_branch": "develop",
+	"git_dir": "/var/www/html/setv-api/",
+	"git_commit": "",
+	"git_commit_limit": 10,
+	
+	"remote_dir": "/var/www/html/setv-api/",
+
+	"bin_shell": "bash",
+	"bin_php": "php",
+	"bin_phing": "phing",
+
+	"actions": {
+		"_extended_from": "captn",
+		"default": [
+			"# Deploy by GIT"
+			":captn_init",
+			":captn_git"
+		],
+		"captn_init": [
+			"# trace ERR through pipes",
+			"set -o pipefail",
+			"# trace ERR through 'time command' and other functions",
+			"set -o errtrace",
+			"# set -u : exit the script if you try to use an uninitialised variable",
+			"set -o nounset",
+			"# set -e : exit the script if any statement returns a non-true return value",
+			"set -o errexit"
+		],
+		"captn_git": [
+			"# This script deploy on remote server using GIT"
+			"#####################################################"
+			"# Start message for the script"
+			"captn_start"
+			"# Clean local directory to prepare for cloning"
+			":captn_clean",
+			"# Connect to remote to get the actual GIT commit id"
+			":captn_check_remote",
+			"# clone, deploy and verify on local"
+			":captn_local",
+			"# clone, deploy and verify on remote"
+			":captn_remote",
+			"# test if server is doing well"
+			":captn_test"
+		],
+		"captn_pack": [
+			"# This script deploy on remote server using a package"
+			"#####################################################"
+			"# Start message for the script"
+			"captn_start"
+			"# Clean local directory to prepare for cloning"
+			":captn_clean",
+			"# clone, deploy and verify on local"
+			":captn_local",
+			"# clone, deploy and verify on local"
+			":captn_packlocal",
+			"# clone, deploy and verify on remote"
+			":captn_remote",
+			"# test if server is doing well"
+			":captn_test"
+		],
+		"captn_clean": [
+			"captn_clean"
+		],
+		"captn_check_remote": [
+			"captn_check_remote"
+		],
+		"captn_local": [
+			":captn_clone_local",
+			":captn_deploy_local",
+			":captn_verify_local"
+		],
+		"captn_remote": [
+			"captn_update_remote",
+			"captn_deploy_remote",
+			"captn_verify_remote"
+		],
+		"captn_test": [
+			":captn_update_remote",
+			"captn_deploy_remote",
+			"captn_verify_remote"
+		],
+		"captn_test": [
+			":captn_update_remote",
+			"captn_deploy_remote",
+			"captn_verify_remote"
+		],
+		"captn_clone_local": [
+			"captn_clone_local"
+		]
+	}
 }

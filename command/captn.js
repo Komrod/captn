@@ -263,6 +263,9 @@ captn.prototype.runScript = function(onLog, onError, onExit, onResult) {
 		}
 	}
 
+/*
+	TODO put those values on scipt data load
+
 	vars.script_name = this.scriptName;
 	vars.script_json = require('path').resolve(this.configData.script.path+this.scriptName+'.json');
 	vars.script_temp = require('path').resolve(this.configData.script.path+this.scriptName+'/');
@@ -277,7 +280,7 @@ captn.prototype.runScript = function(onLog, onError, onExit, onResult) {
 	vars.ssh_host = this.scriptData.sshHost;
 	vars.ssh_port = this.scriptData.sshPort || '22';
 //	vars.ssh_password = this.scriptData.sshPassword || '';
-
+	
 	vars.git_branch = this.scriptData.gitBranch || '';
 	vars.git_branch_remote = '';
 	vars.git_user = this.scriptData.gitUser || this.getDefaultUsername();
@@ -285,6 +288,7 @@ captn.prototype.runScript = function(onLog, onError, onExit, onResult) {
 	vars.git_dir = this.scriptData.gitDir;
 	vars.git_repo = this.scriptData.gitRepo;
 	vars.git_commit_limit = this.scriptData.gitCommitLimit;
+*/
 
 	//vars.result = "";
 
@@ -317,6 +321,7 @@ captn.prototype.runScript = function(onLog, onError, onExit, onResult) {
 	content += "\n";
 	content += "\n";
 
+	// TODO include files from configData.include and scriptData.include
 	var function_file = require('path').resolve(this.configData.script.path+'functions.sh');
 	if (sd.fileExists(function_file)) {
 		content += require('fs').readFileSync(function_file)+"\n";
@@ -432,7 +437,7 @@ captn_deploy: function to apply patch to
 
  */
 
-
+ 	// TODO use actions instead of commands
 	try {
 		for (t=0; t<this.scriptData.commands.length; t++) {
 			content += "#######################################\n";
