@@ -8,27 +8,18 @@
 
 
 #################################################
-# Verify
+# Start with some informations about the script
 
 # Function to show informations on startup
-function captn_start() {
+function captn_infos() {
 	echo "captn_start: script \"$script_name\""
 	echo "captn_start: $script_description"
 	if [ "$script_warning" != "" ]; then
 		echo "Warning: $script_warning"
 	fi
 	if [ "$script_delay" != "0" ] && [ "$script_delay" != "" ]; then
-		count=`expr $script_delay + 0`
-		while [ "$count" != "0" ]
-		do
-			if [ "$count" == "1" ]; then
-				echo "Continue in $count second"
-			else 
-				echo "Continue in $count seconds"
-			fi
-			count=`expr $count - 1`
-  			sleep 1
-		done
+		echo "Continue in $script_delay seconds"
+  		sleep $script_delay
 	fi
 }
 
@@ -36,53 +27,82 @@ function captn_start() {
 #################################################
 # Clean
 
-
 # Function to clean local temporary files
 function captn_clean() {
-	echo "captn_clean: Start cleaning"
-	echo "captn_clean: script temp directory is \"$script_temp\""
-	echo "captn_clean: deleting directory"
+	local function_name="captn_clean"
+	echo "$function_name: Start cleaning"
+	echo "$function_name: script temp directory is \"$script_temp\""
+	echo "$function_name: deleting all files in directory"
+	rm -fr "$script_temp/*.*"
+	# Check delete error
+	if [ $? != 0 ]; then
+		(>&2 echo "$function_name: failed to delete directory. Aborting")
+		exit 1;
+	fi
+	echo "Success: script temporary files cleaned"
+}
+
+# Function to delete and recreate local temporary directory
+function captn_clean_all() {
+	local function_name="captn_clean_all"
+	echo "$function_name: Start cleaning"
+	echo "$function_name: script temp directory is \"$script_temp\""
+	echo "$function_name: deleting directory"
 	rm -fr "$script_temp"
 	# Check delete error
 	if [ $? != 0 ]; then
-		(>&2 echo "captn_clean: failed to delete directory. Aborting")
+		(>&2 echo "$function_name: failed to delete directory. Aborting")
 		exit 1;
 	fi
-	echo "captn_clean: recreating directory"
+	echo "$function_name: recreating directory"
 	mkdir "$script_temp"
 	# Check creation error
 	if [ $? != 0 ]; then
-		(>&2 echo "captn_clean: failed to create directory. Aborting")
+		(>&2 echo "$function_name: failed to create directory. Aborting")
 		exit 1;
 	fi
 	echo "Success: script temp directory cleaned"
 }
 
+# Function to delete and recreate local temporary directory
+function captn_clean_clone() {
+	local function_name="captn_clean_clone"
+	echo "$function_name: Start cleaning cloned directory"
+	echo "$function_name: script temp directory is \"$script_temp\""
+	echo "$function_name: deleting cloned directory"
+	rm -fr "$script_temp/clone/"
+	# Check delete error
+	if [ $? != 0 ]; then
+		(>&2 echo "$function_name: failed to delete directory. Aborting")
+		exit 1;
+	fi
+	echo "Success: script clone directory deleted"
+}
+
 
 #################################################
-# Check remote
-
+# Check git remote
 
 # Function to check remote server by SSH
-function captn_check_remote() {
-	echo "captn_check_remote: getting branch from remote server"
-	echo "captn_check_remote: connecting to $ssh_host:$ssh_port"
+function captn_check_git_remote() {
+	local function_name="captn_check_git_remote"
+	echo "$function_name: getting branch from remote server"
+	echo "$function_name: connecting to $ssh_host:$ssh_port"
 	{
 		ssh -tt -p $ssh_port $ssh_user@$ssh_host "cd $git_dir && git rev-parse --abbrev-ref HEAD && git rev-parse HEAD"
 	} > $script_temp/remote.txt 2> /dev/null
 	return_code=$?
 	if [ $(grep -c "fatal" $script_temp/remote.txt) -ne 0 ]; then
 		(>&2 cat $script_temp/remote_branch.txt)
-		(>&2 echo "captn_check_remote: failed to get the remote branch name. Aborting")
+		(>&2 echo "$function_name: failed to get the remote branch name. Aborting")
 		exit 1;
 	fi
 	if [ $return_code -ne 0 ]; then
-		(>&2 echo "captn_check_remote: failed to connect to SSH. Aborting.")
+		(>&2 echo "$function_name: failed to connect to SSH. Aborting.")
 		exit 1;
 	fi
-	# TODO apparently sometimes the first line is empty, must be sure
+
 	line=1
-	sed -n ${line}p $script_temp/remote.txt
 	first_line=`sed -n ${line}p $script_temp/remote.txt`
 	if [ "$first_line" == "" ]; then
 		line=2
@@ -91,15 +111,13 @@ function captn_check_remote() {
 	git_branch_remote="$first_line" # `sed -n ${line}p $script_temp/remote.txt`
 	line="$(($line+1))"
 	git_commit_remote=`sed -n ${line}p $script_temp/remote.txt`
-#echo "git_branch_remote = $git_branch_remote"
-#echo "git_commit_remote = $git_commit_remote"
 	len=$(echo ${#git_commit_remote})
 	if [ "$git_commit_remote" == "" ] || [ $len -ne 40 ]; then
-		(>&2 echo "captn_check_remote: invalid commit id \"$git_commit_remote\"")
+		(>&2 echo "$function_name: invalid commit id \"$git_commit_remote\"")
 		exit 1;
 	fi
 	if [ "$git_branch_remote" != "$git_branch" ]; then
-		(>&2 echo "captn_check_remote: server branch \"$git_branch_remote\" in \"$git_dir\" is supposed to be \"$git_branch\".")
+		(>&2 echo "$function_name: server branch \"$git_branch_remote\" in \"$git_dir\" is supposed to be \"$git_branch\".")
 		exit 1;
 	fi
 	echo "Success: remote server branch is \"$git_branch_remote\""
@@ -110,12 +128,12 @@ function captn_check_remote() {
 #################################################
 # Clone
 
-
 function captn_clone_local() {
+	local function_name="captn_clone_local"
 
 	############################################
 	# cloning
-	echo "captn_clone_local: start"
+	echo "$function_name: start"
 	cd "$script_temp"
 	if [ $? != 0 ]; then
 	    (>&2 echo "Could not change dir to \"$script_temp\". Aborting")
@@ -134,8 +152,10 @@ function captn_clone_local() {
 	    exit 1;
 	fi
 	echo "Success: repository cloned"
+	git_branch_current=""
 	$( (git_branch_current=`git rev-parse --abbrev-ref HEAD`) 2> /dev/null)
 	if [ $? != 0 ]; then
+		git_branch_current=""
 	    echo "Warning: could not get HEAD of current branch"
 	    echo "Warning: current branch name is unknown"
 	fi
@@ -179,7 +199,7 @@ function captn_clone_local() {
 		echo "$commits"
 		captn_commit $commit_head
 	fi
-	echo "captn_clone_local: using commit id \"$git_commit\""
+	echo "$function_name: using commit id \"$git_commit\""
 
 	############################################
 	# generate changelog
@@ -192,7 +212,7 @@ function captn_clone_local() {
 		    echo "Warning: targeted commit id \"$git_commit\" is already on the server"
 		    captn_ask_continue
 		else
-			echo "captn_clone_local: generating changelog"
+			echo "$function_name: generating changelog"
 			git log $git_commit_remote..$git_commit --pretty=format:"%H - %cn, %ad : %s"  > $script_temp/changelog.md
 			if [ $? != 0 ]; then
 			    echo "Warning: could not generate changelog in \"$script_temp/changelog.txt\""
@@ -207,14 +227,55 @@ function captn_clone_local() {
 		fi
 	fi
 
-	echo "captn_clone_local: updating local repository to commit \"$git_commit\""
+	echo "$function_name: updating local repository to commit \"$git_commit\""
 	result=$( (git reset $git_commit --hard) 2> /dev/null )
 	if [ $? != 0 ]; then
 		(>&2 echo "$result")
 		(>&2 echo "Could not update local repository to correct commit id \"$git_commit\". Aborting")
-		exit 0;
+		exit 1;
 	fi
 	echo "Success: local repository updated"
+}
+
+
+function captn_choose_commit() {
+	# choose commit if necessary
+	if [ "$git_commit" == "" ]; then
+		if [ ! -d "$script_temp/clone/" ]; then
+			echo "Warning: no local repository found. Could not get commit list"
+			captn_commit $git_commit_default
+		else
+			# get local commit list
+			if [ "$git_commit_list" == "" ]; then
+				git_commit_list=$(git log --pretty=format:"%H - %cn : %s" -$git_commit_limit)
+			fi
+			# get local HEAD commit id
+			if [ "$git_commit_head" == "" ]; then
+				git_commit_head=$(git rev-parse HEAD)
+			fi
+			if [ "$git_commit_head" == "" ]; then
+				echo "Warning: could not get last commit"
+			else
+				echo "Last commit is \"$git_commit_head\""
+			fi
+			echo "List of $git_commit_limit last commits:"
+			echo "$git_commit_list"
+			captn_commit $git_commit_head
+		fi
+	fi
+	if [ $? != 0 ]; then
+		(>&2 echo "Error while choosing commit id. Aborting")
+		exit 1;
+	fi
+	if [ "$git_commit" == "" ]; then
+		echo "Warning: commit id is empty"
+		if [ "$git_commit_default" == "" ]; then
+			(>&2 echo "Default commit id is empty")
+			return 1;
+		fi
+		exit 1;
+	fi
+	echo "captn_clone_local: using commit id \"$git_commit\""
 }
 
 
@@ -270,27 +331,28 @@ function captn_deploy_remote() {
 #################################################
 # update remote
 
-
-function captn_update_remote() {
-	
+# Update 
+function captn_update_git_remote() {
+	function_name="captn_update_git_remote"
 	captn_ask "Do you really want to deploy to the remote server" "no"
-	if [ "$()" == "0" ]; then
+	if [ "$(captn_yes $response)" == "0" ]; then
 	    (>&2 echo "User choose to Abort")
     	exit 1;
 	fi
 
-	echo "captn_update_remote: connecting to $ssh_host:$ssh_port"
+	echo "$function_name: connecting to $ssh_host:$ssh_port"
 	{
+		# eventually add git pull 
 		ssh -tt -p $ssh_port $ssh_user@$ssh_host "cd $git_dir && git reset $git_commit --hard"
 	} > $script_temp/remote_update.txt 2> /dev/null
 	return_code=$?
-	if [ $(grep -c "fatal" $script_temp/remote.txt) -ne 0 ]; then
-		(>&2 cat $script_temp/remote_branch.txt)
-		(>&2 echo "captn_update_remote: failed to update the remote server. Aborting")
+	if [ $(grep -c "fatal" $script_temp/remote_update.txt) -ne 0 ]; then
+		(>&2 cat $script_temp/remote_update.txt)
+		(>&2 echo "$function_name: failed to update the remote server. Aborting")
 		exit 1;
 	fi
 	if [ $return_code -ne 0 ]; then
-		(>&2 echo "captn_update_remote: failed to connect to SSH. Aborting.")
+		(>&2 echo "$function_name: failed to connect to SSH. Aborting.")
 		exit 1;
 	fi
 
@@ -327,7 +389,7 @@ function captn_finish() {
 function captn_commit() {
 	# using first parameter for default commit or HEAD
 	local default="HEAD"
-	if [ "$1" != "" ]; then
+	if [ $# == 1 ] && [ "$1" != "" ]; then
 		default="$1"
 	fi
 
@@ -335,13 +397,15 @@ function captn_commit() {
 	git_commit="$response"
 
 	# verify commit id
-	cd "$script_temp/clone/"
-	local commit=$( (git cat-file -t $git_commit) 2> /dev/null )
-	if [ "$commit" != "commit" ]; then
-		(>&2 echo "Invalid commit id \"$git_commit\"")
-		# loop unitil a correct commit is entered
-		captn_commit
-		return 0;
+	if [ -d "$script_temp/clone/" ]; then
+		cd "$script_temp/clone/"
+		local commit=$( (git cat-file -t $git_commit) 2> /dev/null )
+		if [ "$commit" != "commit" ]; then
+			(>&2 echo "Invalid commit id \"$git_commit\"")
+			# loop unitil a correct commit is entered
+			captn_commit
+			return 0;
+		fi
 	fi
 	return 0;
 }

@@ -5,18 +5,15 @@ Easy web server production deployment
 
 ## TODO
 
-- have "use_" variables instead of "skip_"
-- pass to shell all the variables inside script config except object
-- multiple actions in one script
-- create one action for every step
 - extend script actions from default captn actions
-- error check step
-- update remote server step
+- have "use_" variables instead of "skip_"
 - optional choose bash command in captn config
 - optional choose ssh command in captn config
 - optional generate archive in remote in script config
 - optional generate changelog in captn config
-
+- command "explain"
+- command line to return script / build script
+- change "run" command to "deploy" command
 - Continue on error command option
 - if in command option
 - pass program parameters to script
@@ -25,7 +22,7 @@ Easy web server production deployment
 - function to ask a response on a selected list
 - generate and store the diff of the code
 - optional generate difflog in captn config
-- console show default answer when pressing enter in acptn_ask
+- console show default answer when pressing enter in captn_ask
 - dont delete the cloned repository of the script
 - make an action to clean everything, even the cloned directory
 - action to test SSH
@@ -40,6 +37,11 @@ Easy web server production deployment
 
 ## DONE
 
+- error check step
+- update remote server step
+- multiple actions in one script
+- create one action for every step
+- pass to shell all the variables inside script config except object
 - skip checking remote commit if git_commit_remote is filled
 - message "press [ctrl-c] at any time to quit"
 - function to ask if you want to continue

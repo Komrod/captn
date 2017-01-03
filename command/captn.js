@@ -186,7 +186,11 @@ captn.prototype.loadScript = function(scriptName) {
 	this.scriptData.script_action = '';
 	this.scriptData.script_date = sd.getDateTime();
 	this.scriptData.script_local = require("os").hostname();
+	this.scriptData.script_true_values = this.configData.script.true_values.join(' ');
 
+	this.scriptData.git_commit_list = "";
+	this.scriptData.git_commit_head = "";
+	
 	return result;
 };
 

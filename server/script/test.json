@@ -1,6 +1,6 @@
 {
 	"script_description": "Synergie&vous API offre",
-	"script_warning" : "coucou",
+	"script_warning" : "",
 	"script_delay": 0,
 
 	"ssh_host": "213.56.106.169",
@@ -14,7 +14,8 @@
 	"git_dir": "/var/www/html/setv-api/",
 	"git_commit": "",
 	"git_commit_limit": 10,
-
+	"git_commit_default": "",
+	
 	"remote_dir": "/var/www/html/setv-api/",
 
 	"bin_shell": "bash",
@@ -24,11 +25,10 @@
 	"actions": {
 		"_extended_from": "captn",
 		"default": [
-			"# Deploy by GIT",
-			":captn_init",
-			":captn_git"
+			":deploy_with_git_simple"
 		],
-		"captn_init": [
+
+		"action_init": [
 			"# trace ERR through pipes",
 			"set -o pipefail",
 			"# trace ERR through 'time command' and other functions",
@@ -38,67 +38,81 @@
 			"# set -e : exit the script if any statement returns a non-true return value",
 			"set -o errexit"
 		],
-		"captn_git": [
+
+		"deploy_with_git": [
 			"# This script deploy on remote server using GIT",
 			"#####################################################",
-			"# Start message for the script",
-			"captn_start",
-			"# Clean local directory to prepare for cloning",
-			":captn_clean",
-			"# Connect to remote to get the actual GIT commit id",
-			":captn_check_remote",
-			"# clone, deploy and verify on local",
-			":captn_local",
-			"# clone, deploy and verify on remote",
-			":captn_remote",
-			"# test if server is doing well",
-			":captn_test"
+			":action_init",
+			"captn_infos",
+			":action_clean",
+			":action_check_git_remote",
+			":action_deploy_git_local",
+			":action_deploy_git_remote",
+			":action_test"
 		],
-		"captn_pack": [
+		"deploy_with_git_simple": [
+			"# This script deploy on remote server using GIT",
+			"#####################################################",
+			":action_init",
+			"captn_infos",
+			":action_clean",
+			"captn_choose_commit",
+			":action_deploy_git_remote",
+			":action_test"
+		],
+		"deploy_with_package": [
 			"# This script deploy on remote server using a package",
 			"#####################################################",
-			"# Start message for the script",
+			":action_init",
 			"captn_start",
-			"# Clean local directory to prepare for cloning",
-			":captn_clean",
-			"# clone, deploy and verify on local",
-			":captn_local",
-			"# clone, deploy and verify on local",
-			":captn_packlocal",
-			"# clone, deploy and verify on remote",
-			":captn_remote",
-			"# test if server is doing well",
+			":action_clean"
+		],
+		"deploy_with_local_package": [
+			"# This script deploy on remote server using a local package",
+			"#####################################################",
+			":action_init",
+			"captn_infos",
+			":action_clean",
+			"captn_ask \"Local package to use\"",
+			"package_file=\"$result\"",
+			":action_deploy_package",
 			":captn_test"
 		],
-		"captn_clean": [
+
+		"action_clean": [
 			"captn_clean"
 		],
-		"captn_check_remote": [
-			"captn_check_remote"
+		"action_clean_all": [
+			"captn_clean_all"
 		],
-		"captn_local": [
-			":captn_clone_local",
-			":captn_deploy_local",
-			":captn_verify_local"
+		"action_clean_clone": [
+			"captn_clean_clone"
 		],
-		"captn_remote": [
-			"captn_update_remote",
-			"captn_deploy_remote",
-			"captn_verify_remote"
+		"action_check_git_remote": [
+			"captn_check_git_remote"
 		],
-		"captn_test": [
-			"# test if website if ok"
+		"action_deploy_git_local": [
+			":action_clone_local",
+			":action_install_local",
+			":action_verify_local"
 		],
-		"captn_clone_local": [
+		"action_deploy_git_remote": [
+			":action_update_git_remote",
+			":action_install_remote",
+			":action_verify_remote"
+		],
+		"action_test": [],
+		"action_clone_local": [
 			"captn_clone_local"
 		],
-		"captn_deploy_local": [
+		"action_update_local": [],
+		"action_verify_local": [],
+		"action_deploy_remote": [],
+		"action_verify_remote": [],
+		"action_install_local": [],
+		"action_update_git_remote": [
+			"captn_update_git_remote"
 		],
-		"captn_verify_local": [
-		],
-		"captn_deploy_remote": [
-		],
-		"captn_verify_remote": [
-		]
+		"action_install_remote": []
 	}
 }
