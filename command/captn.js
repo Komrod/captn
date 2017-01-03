@@ -1,5 +1,7 @@
 
+
 var sd = require('node-screwdriver');
+
 
 function captn() {
 	
@@ -81,6 +83,7 @@ captn.prototype.initServerDir = function() {
 	return result;
 };
 
+
 captn.prototype.createFile = function(file, content, result) {
 	if (!sd.fileExists(file)) {
 		result.messages.push({message: 'Creating the file "'+file+'"', type: 'log'});
@@ -94,6 +97,7 @@ captn.prototype.createFile = function(file, content, result) {
 		result.messages.push({message: 'The file "'+file+'" already exists', type: 'log'});
 	}
 };
+
 
 captn.prototype.createDir = function(dir, result) {
 	if (!sd.dirExists(dir)) {
@@ -174,6 +178,15 @@ captn.prototype.loadScript = function(scriptName) {
 
 	this.scriptName = scriptName;
 	this.isReady = true;
+
+	this.scriptData.script_name = this.scriptName;
+	this.scriptData.script_json = require('path').resolve(this.configData.script.path+this.scriptName+'.json');
+	this.scriptData.script_temp = require('path').resolve(this.configData.script.path+this.scriptName+'/');
+	this.scriptData.script_sh = require('path').resolve(this.configData.script.path+this.scriptName+'.sh');
+	this.scriptData.script_action = '';
+	this.scriptData.script_date = sd.getDateTime();
+	this.scriptData.script_local = require("os").hostname();
+
 	return result;
 };
 
@@ -219,7 +232,10 @@ captn.prototype.getScriptList = function(scriptName) {
  * Server
  *********************************************************************/
 
-captn.prototype.runScript = function(onLog, onError, onExit, onResult) {
+captn.prototype.runScript = function(action, onLog, onError, onExit, onResult) {
+
+	action = action || 'default';
+	this.scriptData.script_action = action;
 
 	// check error state
 	if (this.hasError) {
@@ -243,21 +259,27 @@ captn.prototype.runScript = function(onLog, onError, onExit, onResult) {
 	}
 
 	// check is there are commands in script data
-	if (!this.scriptData.commands || this.scriptData.commands.length == 0) {
-		onError('No commands to run');
+	if (!this.scriptData.actions) {
+		onError('No actions to run');
 		onExit(1);
 		return false;
 	}
 
-	var vars = {};
+	// check action
+	if (!sd.isArray(this.scriptData.actions[action])) {
+		onError('Action "'+action+'" is unknown');
+		onExit(1);
+		return false;
+	}
+
 
 	// delete previous script
-	vars.script_sh = require('path').resolve(this.configData.script.path+this.scriptName+'.sh');
-	if (sd.fileExists(vars.script_sh)) {
-		onLog('Deleting previous script file "'+vars.script_sh+'"');
-		require('fs').unlinkSync(vars.script_sh);
-		if (sd.fileExists(vars.script_sh)) {
-			onError('File "'+vars.script_sh+'" cannot be deleted');
+	this.scriptData.script_sh = require('path').resolve(this.configData.script.path+this.scriptName+'.sh');
+	if (sd.fileExists(this.scriptData.script_sh)) {
+		onLog('Deleting previous script file "'+this.scriptData.script_sh+'"');
+		require('fs').unlinkSync(this.scriptData.script_sh);
+		if (sd.fileExists(this.scriptData.script_sh)) {
+			onError('File "'+this.scriptData.script_sh+'" cannot be deleted');
 			onExit(1);
 			return false;
 		}
@@ -292,31 +314,33 @@ captn.prototype.runScript = function(onLog, onError, onExit, onResult) {
 
 	//vars.result = "";
 
-	for(var name in vars) {
-		content += name+"=\""+vars[name]+"\"\n";
-	}
-
 	var content = "#!/bin/bash\n\n";
 	content += "#######################################\n";
 	content += "# Captn - deploy script\n";
 	content += "#######################################\n";
-	content += "# Name: "+vars.script_name+"\n";
-	content += "# Description: "+vars.script_description+"\n";
-	content += "# Date: "+vars.script_date+"\n";
-	content += "# Local host: "+vars.script_local+"\n";
-	content += "# SSH user: "+vars.ssh_user+"\n";
-	content += "# SSH server: "+vars.ssh_host+":"+vars.ssh_port+"\n";
-	content += "# GIT user: "+vars.git_user+"\n";
-	content += "# GIT repository: "+vars.git_repo+"\n";
-	content += "# Target dir: "+vars.git_dir+"\n";
+	content += "# Name: "+this.scriptData.script_name+"\n";
+	content += "# Description: "+this.scriptData.script_description+"\n";
+	content += "# Date: "+this.scriptData.script_date+"\n";
+	content += "# Local host: "+this.scriptData.script_local+"\n";
+	content += "# SSH user: "+this.scriptData.ssh_user+"\n";
+	content += "# SSH server: "+this.scriptData.ssh_host+":"+this.scriptData.ssh_port+"\n";
+	content += "# GIT user: "+this.scriptData.git_user+"\n";
+	content += "# GIT repository: "+this.scriptData.git_repo+"\n";
+	content += "# Target dir: "+this.scriptData.git_dir+"\n";
 	content += "#######################################\n";
 	content += "\n";
 	content += "\n";
 
 	content += "# Variables\n";
 	content += "\n";
-	for(var name in vars) {
-		content += name+"=\""+vars[name]+"\"\n";
+	for(var name in this.scriptData) {
+		if (sd.isArray(this.scriptData[name])) {
+			content += name+"=\""+this.scriptData[name].join(' ')+"\"\n";
+		} else if (sd.isObject(this.scriptData[name])) {
+			// do nothing
+		} else {
+			content += name+"=\""+this.scriptData[name]+"\"\n";
+		}
 	}
 	content += "\n";
 	content += "\n";
@@ -330,81 +354,7 @@ captn.prototype.runScript = function(onLog, onError, onExit, onResult) {
 	if (sd.fileExists(function_file)) {
 		content += require('fs').readFileSync(function_file)+"\n";
 	}
-/*
-	content += "# Functions\n";
-	content += "\n";
-	content += "# Function to clean temporary directory and files\n";
-	content += "function captn_clean() {\n";
-	content += "	echo \"captn_clean: Start cleaning directory\"\n";
-	content += "	echo \"captn_clean: script temp directory is \\\"$script_temp\\\"\"\n";
-	content += "	echo \"captn_clean: deleting directory\"\n";
-	content += "	rm -fr \"$script_temp\"\n";
-	content += "	# Check delete error\n";
-	content += "	if [ $? != 0 ]; then\n"
-	content += "		(>&2 echo \"captn_clean: failed to delete directory. Aborting.\")\n";
-	content += "		exit 1;\n";
-	content += "	fi\n";
-	content += "	echo \"captn_clean: recreating directory\"\n";
-	content += "	mkdir \"$script_temp\"\n";
-	content += "	# Check creation error\n";
-	content += "	if [ $? != 0 ]; then\n"
-	content += "		(>&2 echo \"captn_clean: failed to create directory. Aborting.\")\n";
-	content += "		exit 1;\n";
-	content += "	fi\n";
-	content += "	echo \"Success: script temp directory cleaned\"\n";
-	content += "}\n";
-	content += "\n";
-	content += "\n";
-	content += "# Function to show informations on startup\n";
-	content += "function captn_start() {\n";
-	content += "	echo \"captn_start: script $script_name\"\n";
-	content += "}\n";
-	content += "\n";
-	content += "\n";
-	content += "# Function to check ssh and git validity\n";
-	content += "function captn_check() {\n";
-	content += "	echo \"captn_check: getting branch from server\"\n";
-	content += "	echo \"captn_check: connecting to $ssh_host:$ssh_port\"\n";
-	content += "	{\n";
-	if (vars.ssh_password == '') {
-		content += "		ssh -tt -p $ssh_port $ssh_user@$ssh_host \"cd "+vars.git_dir+" && git rev-parse --abbrev-ref HEAD\"\n";
-	} else {
-		content += "		echo \"$ssh_password\" | ssh -tt -p $ssh_port $ssh_user@$ssh_host \"cd "+vars.git_dir+" && git rev-parse --abbrev-ref HEAD && git rev-parse HEAD\"\n";
-	}
-	content += "	} > $script_temp/remote.txt 2> /dev/null\n";
-	content += "	return_code=$?\n";
-	content += "	if [ $(grep -c \"fatal\" $script_temp/remote.txt) -ne 0 ]; then\n"
-	content += "		(>&2 cat $script_temp/remote_branch.txt)\n";
-	content += "		(>&2 echo \"captn_check: failed to get the remote branch name. Aborting.\")\n";
-	content += "		exit 1;\n";
-	content += "	fi\n";
-	content += "	if [ $return_code -ne 0 ]; then\n"
-	content += "		(>&2 echo \"captn_check: failed to connect to SSH. Aborting.\")\n";
-	content += "		exit 1;\n";
-	content += "	fi\n";
-	content += "	git_branch_remote=`sed -n '2p' $script_temp/remote.txt`\n";
-	content += "	git_branch_remote=\"$(echo -e \"${git_branch_remote}\" | tr -d '[:space:]')\"\n";
-	content += "	git_commit=`sed -n '3p' $script_temp/remote.txt`\n";
-	content += "	git_commit=\"$(echo -e \"${git_commit}\" | tr -d '[:space:]')\"\n";
-content += "echo \"git_branch_remote = $git_branch_remote\"\n";	
-content += "echo \"git_branch = $git_branch\"\n";	
-content += "echo \"git_commit = $git_commit\"\n";
-	content += "	len=$(echo ${#git_commit})\n";
-content += "echo \"len = $len\"\n";
-	content += "	if [ \"$git_commit\" == \"\" ] || [ $len -ne 40 ]; then\n"
-	content += "		(>&2 echo \"captn_check: invalid commit id \\\"$git_commit\\\"\")\n";
-	content += "		exit 1;\n";
-	content += "	fi\n";
-	content += "	if [ \"$git_branch_remote\" != \"$git_branch\" ]; then\n"
-	content += "		(>&2 echo \"captn_check: server branch \\\"$git_branch_remote\\\" in \\\"$git_dir\\\" is supposed to be \\\"$git_branch\\\".\")\n";
-	content += "		exit 1;\n";
-	content += "	fi\n";
-	content += "	echo \"Success: actual server branch is \\\"$git_branch_remote\\\"\"\n";
-	content += "	echo \"Success: last commit is \\\"$git_commit\\\"\"\n";
-	content += "}\n";
-	content += "\n";
-	content += "\n";
-*/
+
 /*
 
 script_json: absolute path for the json file of the script
@@ -439,37 +389,15 @@ captn_deploy: function to apply patch to
 
  	// TODO use actions instead of commands
 	try {
-		for (t=0; t<this.scriptData.commands.length; t++) {
-			content += "#######################################\n";
-			content += "# Command "+(t+1)+"\n";
-			if (this.scriptData.commands[t].skip) {
-				content += "# "+this.getCommandLine(this.scriptData.commands[t])+"\n";
-				content += "# Skip this command \n";
-				content += "\n";
-				continue;
-			}
-			content += this.getCommandLine(this.scriptData.commands[t])+"\n";
-			content += "if [ $? != 0 ]; then\n"
-			if (this.scriptData.commands[t].onError) {
-				content += "    (>&2 echo  \""+this.scriptData.commands[t].onError+"\")\n";
-			} else {
-				content += "    (>&2 echo \"Command failed. Aborting\")\n";
-			}
-	    	content += "    exit 1;\n";
-			content += "fi\n";
-			if (this.scriptData.commands[t].onSuccess) {
-				content += "echo  \""+this.scriptData.commands[t].onSuccess+"\"\n";
-			}
-			content += "\n";
-		}
+		content += this.getAction(action, onLog, onError, onExit, onResult);
 
-		onLog('Writting script in file "'+vars.script_sh+'"');
-		require('fs').writeFileSync(vars.script_sh, content);
+		onLog('Writting script in file "'+this.scriptData.script_sh+'"');
+		require('fs').writeFileSync(this.scriptData.script_sh, content);
 
 		onLog('Running script');
 
 		var spawn = require('child_process').spawn,
-		    shell = spawn(this.configData.script.shell || 'bash', [vars.script_sh]),
+		    shell = spawn(this.configData.script.shell || 'bash', [this.scriptData.script_sh]),
 		    quit = false;
 
 		if (!shell) {
@@ -507,31 +435,73 @@ captn_deploy: function to apply patch to
 };
 
 
-captn.prototype.getCommandLine = function(command) {
+captn.prototype.getAction = function(action, onLog, onError, onExit, onResult) {
+	var content = '';
+	var commands = this.scriptData.actions[action];
+	if (!commands) {
+		onError('Action "'+action+'" is unknown');
+		onExit(1);
+		return false;
+	}
+	for (var t=0; t<commands.length; t++) {
+		content += this.getCommand(commands[t], onLog, onError, onExit, onResult);
+	}
+	return content;
+};
+
+
+captn.prototype.getCommand = function(command, onLog, onError, onExit, onResult) {
+
+	var content = "#######################################\n";
+	
 	if (sd.isString(command)) {
-		return command;
+		command = {exec: command};
 	}
-	var line = command.exec;
-	if (command.params && sd.isString(command.params)) {
-		line += ' '+command.params;
-	} else if (command.params && command.params.length > 0) {
-		line += ' '+command.params.join(' ');
+
+	if (command.skip) {
+		content += "# "+command.exec+"\n";
+		content += "# Skip this command \n";
+		content += "\n";
+		return content;
 	}
-	return sd.trim(line);
+
+	if (sd.startsWith(command.exec, '#')) {
+		content += command.exec+"\n";
+		content += "\n";
+		return content;
+	}
+
+	if (sd.startsWith(sd.trim(command.exec), ':')) {
+		var action = command.exec.substr(1);
+		content += "# Start action \""+action+"\"\n";
+		content += "\n";
+		content += this.getAction(action, onLog, onError, onExit, onResult);
+		content += "\n";
+		content += "# End action \""+action+"\"\n";
+		content += "\n";
+
+		return content;
+	}
+
+	content += command.exec+"\n";
+	content += "if [ $? != 0 ]; then\n"
+	if (command.onError) {
+		content += "    (>&2 echo  \""+command.onError+"\")\n";
+	} else {
+		content += "    (>&2 echo \"Command failed. Aborting\")\n";
+	}
+	content += "    exit 1;\n";
+	content += "fi\n";
+	if (command.onSuccess) {
+		content += "echo  \""+command.onSuccess+"\"\n";
+	}
+	content += "\n";
+
+	return content;
 };
 
 
-captn.prototype.getCommand = function(str) {
-	var elements = str.split(' ');
-	var command = {
-		exec: elements[0],
-	};
-	elements.shift();
-	if (elements.length > 0) {
-		command.params = elements;
-	}
-	return command;
-};
+
 
 
 captn.prototype.runCommand = function(command, result) {
@@ -596,43 +566,6 @@ captn.prototype.runCommand = function(command, result) {
 	}
 
 	return result;
-
-	/*
-	if (command.params) {
-	    cmd = spawn(command.exec, command.params);
-	} else {
-	    cmd = spawn(command.exec);
-	}
-
-
-	cmd.stdout.on('data', (data) => {
-		if (!command.hideResult) {
-			result.messages.push({message: sd.trim(data), type: 'result'});
-		}
-	});
-
-	cmd.stderr.on('data', (data) => {
-		result.messages.push({message: sd.trim(data), type: 'error'});
-	});
-
-	cmd.on('close', (code) => {
-		result.messages.push({message: 'Command exit with code '+code, type: 'log'});
-		if (code != 0 && command.onError) {
-			result.messages.push({message: command.onError, type: 'error'});
-		}
-		if (code == 0 && command.onError) {
-			result.messages.push({message: command.onSuccess, type: 'success'});
-		}
-		result.success = false;
-		quit = true;
-	});
-
-	while (quit === false) {
-		require('deasync').sleep(10);
-	}
-
-	return result;
-	*/
 };
 
 

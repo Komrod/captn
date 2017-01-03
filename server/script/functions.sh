@@ -227,19 +227,19 @@ function captn_deploy_local() {
 	root="$script_temp/clone/"
 
 	# composer update / install
-	if [ "$use_deploy_composer" == "1" ]; then;
-		captn_composer $root
-	fi
+#	if [ "$use_deploy_composer" == "1" ]; then;
+#		captn_composer $root
+#	fi
 
 	# enable drupal 7/8 drush
-	if [ "$use_deploy_drush_enable" == "1" ]; then;
-		captn_drush_enable $root
-	fi
+#	if [ "$use_deploy_drush_enable" == "1" ]; then;
+#		captn_drush_enable $root
+#	fi
 	
 	# empty drupal 7/8 cache
-	if [ "$use_deploy_empty_cache" == "1" ]; then;
-		captn_drush_empty_cache $root
-	fi
+#	if [ "$use_deploy_empty_cache" == "1" ]; then;
+#		captn_drush_empty_cache $root
+#	fi
 }
 
 

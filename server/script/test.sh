@@ -5,8 +5,8 @@
 #######################################
 # Name: test
 # Description: Synergie&vous API offre
-# Date: 2016-12-29 18:23:59
-# Local host: SYN1506
+# Date: 2017-01-03 03:22:10
+# Local host: Thierry-PC
 # SSH user: root
 # SSH server: 213.56.106.169:22
 # GIT user: 07516
@@ -17,26 +17,33 @@
 
 # Variables
 
-script_sh="C:\Users\PR033\git\captn\server\script\test.sh"
-script_name="test"
-script_json="C:\Users\PR033\git\captn\server\script\test.json"
-script_temp="C:\Users\PR033\git\captn\server\script\test"
-script_date="2016-12-29 18:23:59"
-script_local="SYN1506"
-script_warning="coucou"
 script_description="Synergie&vous API offre"
+script_warning="coucou"
 script_delay="0"
-script_true_values="y Y yes Yes YES 1 true ok yep"
-ssh_user="root"
 ssh_host="213.56.106.169"
 ssh_port="22"
-git_branch="develop"
-git_branch_remote=""
-git_user="07516"
+ssh_user="root"
 git_host="srv006.domsyn.fr"
-git_dir="/var/www/html/setv-api/"
 git_repo="d:/depotsGit/setv-api.git"
+git_user="07516"
+git_branch="develop"
+git_dir="/var/www/html/setv-api/"
+git_commit=""
 git_commit_limit="10"
+remote_dir="/var/www/html/setv-api/"
+bin_shell="bash"
+bin_php="php"
+bin_phing="phing"
+script_name="test"
+script_json="C:\Users\Thierry\git\captn\server\script\test.json"
+script_temp="C:\Users\Thierry\git\captn\server\script\test"
+script_sh="C:\Users\Thierry\git\captn\server\script\test.sh"
+script_action="default"
+script_date="2017-01-03 03:22:10"
+script_local="Thierry-PC"
+
+
+
 
 
 
@@ -75,9 +82,9 @@ function captn_start() {
 # Clean
 
 
-# Function to clean temporary files
+# Function to clean local temporary files
 function captn_clean() {
-	echo "captn_clean: Start cleaning directory"
+	echo "captn_clean: Start cleaning"
 	echo "captn_clean: script temp directory is \"$script_temp\""
 	echo "captn_clean: deleting directory"
 	rm -fr "$script_temp"
@@ -264,7 +271,20 @@ function captn_deploy_local() {
 	echo "captn_deploy_local: start"
 	root="$script_temp/clone/"
 
-	# compoer update / install
+	# composer update / install
+#	if [ "$use_deploy_composer" == "1" ]; then;
+#		captn_composer $root
+#	fi
+
+	# enable drupal 7/8 drush
+#	if [ "$use_deploy_drush_enable" == "1" ]; then;
+#		captn_drush_enable $root
+#	fi
+	
+	# empty drupal 7/8 cache
+#	if [ "$use_deploy_empty_cache" == "1" ]; then;
+#		captn_drush_empty_cache $root
+#	fi
 }
 
 
@@ -428,7 +448,67 @@ function array_contains() {
 
 
 #######################################
-# Command 1
+# Deploy by GIT
+
+#######################################
+# Start action "captn_init"
+
+#######################################
+# trace ERR through pipes
+
+#######################################
+set -o pipefail
+if [ $? != 0 ]; then
+    (>&2 echo "Command failed. Aborting")
+    exit 1;
+fi
+
+#######################################
+# trace ERR through 'time command' and other functions
+
+#######################################
+set -o errtrace
+if [ $? != 0 ]; then
+    (>&2 echo "Command failed. Aborting")
+    exit 1;
+fi
+
+#######################################
+# set -u : exit the script if you try to use an uninitialised variable
+
+#######################################
+set -o nounset
+if [ $? != 0 ]; then
+    (>&2 echo "Command failed. Aborting")
+    exit 1;
+fi
+
+#######################################
+# set -e : exit the script if any statement returns a non-true return value
+
+#######################################
+set -o errexit
+if [ $? != 0 ]; then
+    (>&2 echo "Command failed. Aborting")
+    exit 1;
+fi
+
+
+# End action "captn_init"
+
+#######################################
+# Start action "captn_git"
+
+#######################################
+# This script deploy on remote server using GIT
+
+#######################################
+#####################################################
+
+#######################################
+# Start message for the script
+
+#######################################
 captn_start
 if [ $? != 0 ]; then
     (>&2 echo "Command failed. Aborting")
@@ -436,47 +516,78 @@ if [ $? != 0 ]; then
 fi
 
 #######################################
-# Command 2
+# Clean local directory to prepare for cloning
+
+#######################################
+# Start action "captn_clean"
+
+#######################################
 captn_clean
 if [ $? != 0 ]; then
     (>&2 echo "Command failed. Aborting")
     exit 1;
 fi
 
+
+# End action "captn_clean"
+
 #######################################
-# Command 3
+# Connect to remote to get the actual GIT commit id
+
+#######################################
+# Start action "captn_check_remote"
+
+#######################################
 captn_check_remote
 if [ $? != 0 ]; then
     (>&2 echo "Command failed. Aborting")
     exit 1;
 fi
 
+
+# End action "captn_check_remote"
+
 #######################################
-# Command 4
+# clone, deploy and verify on local
+
+#######################################
+# Start action "captn_local"
+
+#######################################
+# Start action "captn_clone_local"
+
+#######################################
 captn_clone_local
 if [ $? != 0 ]; then
     (>&2 echo "Command failed. Aborting")
     exit 1;
 fi
 
-#######################################
-# Command 5
-captn_deploy_local
-if [ $? != 0 ]; then
-    (>&2 echo "Command failed. Aborting")
-    exit 1;
-fi
+
+# End action "captn_clone_local"
 
 #######################################
-# Command 6
-captn_verify_local
-if [ $? != 0 ]; then
-    (>&2 echo "Command failed. Aborting")
-    exit 1;
-fi
+# Start action "captn_deploy_local"
+
+
+# End action "captn_deploy_local"
 
 #######################################
-# Command 7
+# Start action "captn_verify_local"
+
+
+# End action "captn_verify_local"
+
+
+# End action "captn_local"
+
+#######################################
+# clone, deploy and verify on remote
+
+#######################################
+# Start action "captn_remote"
+
+#######################################
 captn_update_remote
 if [ $? != 0 ]; then
     (>&2 echo "Command failed. Aborting")
@@ -484,7 +595,6 @@ if [ $? != 0 ]; then
 fi
 
 #######################################
-# Command 8
 captn_deploy_remote
 if [ $? != 0 ]; then
     (>&2 echo "Command failed. Aborting")
@@ -492,18 +602,27 @@ if [ $? != 0 ]; then
 fi
 
 #######################################
-# Command 9
 captn_verify_remote
 if [ $? != 0 ]; then
     (>&2 echo "Command failed. Aborting")
     exit 1;
 fi
 
+
+# End action "captn_remote"
+
 #######################################
-# Command 10
-captn_finish
-if [ $? != 0 ]; then
-    (>&2 echo "Command failed. Aborting")
-    exit 1;
-fi
+# test if server is doing well
+
+#######################################
+# Start action "captn_test"
+
+#######################################
+# test if website if ok
+
+
+# End action "captn_test"
+
+
+# End action "captn_git"
 

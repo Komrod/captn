@@ -94,24 +94,33 @@ captn_cli.prototype.version = function() {
 
 captn_cli.prototype.run = function() {
 
-	try {
-		this.program = require('commander');
-		this.captn = require('./captn.js');
-	} catch (e) {
-		this.error(e);
-		process.exit(1);
-	}
+	this.captn = require('./captn.js');
+	this.program = require('commander');
+
 	this.program.version('0.1.0');
 	var cli = this;
 
 
 	this.program
-		.arguments('<command> [argument]')
+		.arguments('<command> [argument:action]]')
 		.option("-v, --verbose", "Verbose mode")
 		.option("-f, --force", "Force mode")
 		.action(function(command, argument, options) {
 			command = command || '';
 			cli.version();
+
+			var action = '';
+			if (sd.contains(argument, ':')) {
+				var arr = argument.split(':');
+				if (arr.length != 2 || sd.trim(arr[0]) == '' || sd.trim(arr[1]) == '') {
+					cli.error('Invalid script or action "'+command+'"');
+					cli.info('Proper command: captn run <scriptName>');
+					cli.info('List of scripts: captn list');
+					process.exit(1);
+				}
+				argument = arr[0];
+				action = arr[1];
+			}
 
 			if (command == 'init') {
 				if (argument == 'server') {
@@ -155,7 +164,6 @@ captn_cli.prototype.run = function() {
 
 			// run
 			if (command == 'run') {
-				
 				if (!argument) {
 					cli.error('No script specified');
 					cli.info('Proper command: captn run <scriptName>');
@@ -239,7 +247,7 @@ captn_cli.prototype.run = function() {
 
 				cli.result('Start script');
 				cli.log('Press [ctrl-c] at any time to quit');
-				cli.captn.runScript(handleLog, handleError, handleExit, handleResult);
+				cli.captn.runScript(action, handleLog, handleError, handleExit, handleResult);
 				process.exit(0);
 			}
 

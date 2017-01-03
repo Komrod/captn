@@ -2,9 +2,9 @@
 	"mode": "client",
 	"script":
 	{
+		"include": ["functions.captn.sh"],
 		"path": "script/",
-		"true_values": ["y", "Y", "yes", "Yes", "YES", "1", "true", "ok", "yep"],
-		"includes": ["functions.captn.sh"],
+		"true_values": ["y", "Y", "yes", "Yes", "YES", "1", "true", "ok", "yep"]
 	},
 	"log":
 	{

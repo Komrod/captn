@@ -1,12 +1,12 @@
 {
-	"description": "Synergie&vous API offre",
-	"warning" : "coucou",
-	"delay": 0,
-	
+	"script_description": "Synergie&vous API offre",
+	"script_warning" : "coucou",
+	"script_delay": 0,
+
 	"ssh_host": "213.56.106.169",
 	"ssh_port": "22",
 	"ssh_user": "root",
-	
+
 	"git_host": "srv006.domsyn.fr",
 	"git_repo": "d:/depotsGit/setv-api.git",
 	"git_user": "07516",
@@ -14,17 +14,17 @@
 	"git_dir": "/var/www/html/setv-api/",
 	"git_commit": "",
 	"git_commit_limit": 10,
-	
+
 	"remote_dir": "/var/www/html/setv-api/",
 
 	"bin_shell": "bash",
 	"bin_php": "php",
 	"bin_phing": "phing",
-
+	
 	"actions": {
 		"_extended_from": "captn",
 		"default": [
-			"# Deploy by GIT"
+			"# Deploy by GIT",
 			":captn_init",
 			":captn_git"
 		],
@@ -39,35 +39,35 @@
 			"set -o errexit"
 		],
 		"captn_git": [
-			"# This script deploy on remote server using GIT"
-			"#####################################################"
-			"# Start message for the script"
-			"captn_start"
-			"# Clean local directory to prepare for cloning"
+			"# This script deploy on remote server using GIT",
+			"#####################################################",
+			"# Start message for the script",
+			"captn_start",
+			"# Clean local directory to prepare for cloning",
 			":captn_clean",
-			"# Connect to remote to get the actual GIT commit id"
+			"# Connect to remote to get the actual GIT commit id",
 			":captn_check_remote",
-			"# clone, deploy and verify on local"
+			"# clone, deploy and verify on local",
 			":captn_local",
-			"# clone, deploy and verify on remote"
+			"# clone, deploy and verify on remote",
 			":captn_remote",
-			"# test if server is doing well"
+			"# test if server is doing well",
 			":captn_test"
 		],
 		"captn_pack": [
-			"# This script deploy on remote server using a package"
-			"#####################################################"
-			"# Start message for the script"
-			"captn_start"
-			"# Clean local directory to prepare for cloning"
+			"# This script deploy on remote server using a package",
+			"#####################################################",
+			"# Start message for the script",
+			"captn_start",
+			"# Clean local directory to prepare for cloning",
 			":captn_clean",
-			"# clone, deploy and verify on local"
+			"# clone, deploy and verify on local",
 			":captn_local",
-			"# clone, deploy and verify on local"
+			"# clone, deploy and verify on local",
 			":captn_packlocal",
-			"# clone, deploy and verify on remote"
+			"# clone, deploy and verify on remote",
 			":captn_remote",
-			"# test if server is doing well"
+			"# test if server is doing well",
 			":captn_test"
 		],
 		"captn_clean": [
@@ -87,17 +87,18 @@
 			"captn_verify_remote"
 		],
 		"captn_test": [
-			":captn_update_remote",
-			"captn_deploy_remote",
-			"captn_verify_remote"
-		],
-		"captn_test": [
-			":captn_update_remote",
-			"captn_deploy_remote",
-			"captn_verify_remote"
+			"# test if website if ok"
 		],
 		"captn_clone_local": [
 			"captn_clone_local"
+		],
+		"captn_deploy_local": [
+		],
+		"captn_verify_local": [
+		],
+		"captn_deploy_remote": [
+		],
+		"captn_verify_remote": [
 		]
 	}
 }
