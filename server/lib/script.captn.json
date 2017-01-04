@@ -19,7 +19,7 @@
 	"bin_phing": "phing",
 	"actions": {
 		"default": [
-			":deploy_with_git_simple"
+			":deploy-with-git"
 		],
 
 		"init": [
@@ -68,7 +68,7 @@
 
 		"clean": [
 			"# delete files in cache directory of the script",
-			"clean"
+			"captn_clean"
 		],
 		"clean-all": [
 			"# delete and recreate the whole cache directory of the script",

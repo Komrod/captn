@@ -1,116 +1,19 @@
 {
 	"script_description": "Synergie&vous API offre",
-	"script_warning" : "",
-	"script_delay": 0,
-
 	"ssh_host": "213.56.106.169",
 	"ssh_port": "22",
 	"ssh_user": "root",
-
 	"git_host": "srv006.domsyn.fr",
 	"git_repo": "d:/depotsGit/setv-api.git",
 	"git_user": "07516",
 	"git_branch": "develop",
 	"git_dir": "/var/www/html/setv-api/",
-	"git_commit": "",
 	"git_commit_limit": 10,
 	"git_commit_default": "",
-	
 	"remote_dir": "/var/www/html/setv-api/",
-
-	"bin_shell": "bash",
-	"bin_php": "php",
-	"bin_phing": "phing",
-	
 	"actions": {
-		"_extended_from": "captn",
 		"default": [
-			":deploy_with_git_simple"
-		],
-
-		"init": [
-			"# trace ERR through pipes",
-			"set -o pipefail",
-			"# trace ERR through 'time command' and other functions",
-			"set -o errtrace",
-			"# set -u : exit the script if you try to use an uninitialised variable",
-			"set -o nounset",
-			"# set -e : exit the script if any statement returns a non-true return value",
-			"set -o errexit"
-		],
-
-		"deploy-with-git": [
-			"# This script deploy on remote server using GIT",
-			":init",
-			"captn_infos",
-			":clean",
-			":check-git-remote",
-			":deploy-git-local",
-			":deploy-git-remote",
-			":test"
-		],
-		"deploy-with-git-simple": [
-			"# This script deploy on remote server using GIT",
-			":init",
-			"captn_infos",
-			":clean",
-			"captn_choose_commit",
-			":deploy-git-remote",
-			":test"
-		],
-		"deploy-with-package": [
-			"# This script deploy on remote server using a package",
-			":init",
-			"captn_start",
-			":clean"
-		],
-		"deploy-with-local-package": [
-			"# This script deploy on remote server using a local package",
-			":action_init",
-			"captn_infos",
-			":clean",
-			"captn_ask \"Local package to use\"",
-			"package_file=\"$result\"",
-			":deploy-package",
-			":test"
-		],
-
-		"clean": [
-			"clean"
-		],
-		"clean-all": [
-			"captn_clean_all"
-		],
-		"clean-clone": [
-			"captn_clean_clone"
-		],
-		"check-git-remote": [
-			"captn_check_git_remote"
-		],
-		"deploy-git-local": [
-			":clone-local",
-			":install-local",
-			":verify-local"
-		],
-		"deploy-git-remote": [
-			":update-git-remote",
-			":install-remote",
-			":verify-remote"
-		],
-		"test": [
-			"# Testing that the site is working"
-		],
-		"clone-local": [
-			"captn_clone_local"
-		],
-		"update-local": [],
-		"verify-local": [],
-		"deploy-remote": [],
-		"verify-remote": [],
-		"install-local": [],
-		"update-git-remote": [
-			"captn_update_git_remote"
-		],
-		"install-remote": []
+			":deploy-with-git-simple"
+		]
 	}
 }

@@ -5,10 +5,6 @@ Easy web server deployment
 
 ## TODO
 
-- create shell script in cache directory
-- extend script actions from default captn json script
-- include files in shell script
-- change "temp" to "cache"
 - have "use_" variables instead of "skip_"
 - optional choose bash command in captn config
 - optional choose ssh command in captn config
@@ -44,6 +40,10 @@ Easy web server deployment
 
 ## DONE
 
+- write logs
+- change "temp" to "cache"
+- include files in shell script
+- extend script actions from default captn json script
 - error check step
 - update remote server step
 - multiple actions in one script

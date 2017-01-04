@@ -1,5 +1,4 @@
 {
-	"mode": "client",
 	"script":
 	{
 		"include": ["lib/functions.captn.sh"],

@@ -1,3 +1,55 @@
+#!/bin/bash
+
+#######################################
+# Captn - deploy script
+#######################################
+# Name: test
+# Description: Synergie&vous API offre
+# Date: 2017-01-04 17:33:12
+# Local host: SYN1506
+# SSH user: root
+# SSH server: 213.56.106.169:22
+# GIT user: 07516
+# GIT repository: d:/depotsGit/setv-api.git
+# Target dir: /var/www/html/setv-api/
+#######################################
+
+
+# Variables
+
+script_description="Synergie&vous API offre"
+script_warning=""
+script_delay="0"
+ssh_host="213.56.106.169"
+ssh_port="22"
+ssh_user="root"
+git_host="srv006.domsyn.fr"
+git_repo="d:/depotsGit/setv-api.git"
+git_user="07516"
+git_branch="develop"
+git_dir="/var/www/html/setv-api/"
+git_commit=""
+git_commit_limit="10"
+git_commit_default=""
+remote_dir="/var/www/html/setv-api/"
+bin_shell="bash"
+bin_php="php"
+bin_phing="phing"
+script_name="test"
+script_file="script/test.json"
+script_json="C:\Users\PR033\git\captn\server\script\test.json"
+script_dir="C:\Users\PR033\git\captn\server\script\test"
+script_sh="C:\Users\PR033\git\captn\server\script\test.sh"
+script_action="default"
+script_date="2017-01-04 17:33:12"
+script_local="SYN1506"
+script_true_values="y Y yes Yes YES 1 true ok yep"
+git_commit_list=""
+git_commit_head=""
+
+
+# File C:\Users\PR033\git\captn\server/lib/functions.captn.sh
+
 
 
 
@@ -472,4 +524,123 @@ function array_contains() {
     return $in
 }
 
+
+
+
+
+#######################################
+# Start action "deploy-with-git-simple"
+
+#######################################
+# This script deploys on remote server using GIT with just the commit id
+
+#######################################
+# Start action "init"
+
+#######################################
+# Initialize some variables
+
+#######################################
+set -o pipefail
+if [ $? != 0 ]; then
+    (>&2 echo "Command failed. Aborting")
+    exit 1;
+fi
+
+#######################################
+set -o errtrace
+if [ $? != 0 ]; then
+    (>&2 echo "Command failed. Aborting")
+    exit 1;
+fi
+
+#######################################
+set -o nounset
+if [ $? != 0 ]; then
+    (>&2 echo "Command failed. Aborting")
+    exit 1;
+fi
+
+#######################################
+set -o errexit
+if [ $? != 0 ]; then
+    (>&2 echo "Command failed. Aborting")
+    exit 1;
+fi
+
+
+# End action "init"
+
+#######################################
+captn_infos
+if [ $? != 0 ]; then
+    (>&2 echo "Command failed. Aborting")
+    exit 1;
+fi
+
+#######################################
+# Start action "clean"
+
+#######################################
+# delete files in cache directory of the script
+
+#######################################
+captn_clean
+if [ $? != 0 ]; then
+    (>&2 echo "Command failed. Aborting")
+    exit 1;
+fi
+
+
+# End action "clean"
+
+#######################################
+captn_choose_commit
+if [ $? != 0 ]; then
+    (>&2 echo "Command failed. Aborting")
+    exit 1;
+fi
+
+#######################################
+# Start action "deploy-git-remote"
+
+#######################################
+# Start action "update-git-remote"
+
+#######################################
+captn_update_git_remote
+if [ $? != 0 ]; then
+    (>&2 echo "Command failed. Aborting")
+    exit 1;
+fi
+
+
+# End action "update-git-remote"
+
+#######################################
+# Start action "install-remote"
+
+
+# End action "install-remote"
+
+#######################################
+# Start action "verify-remote"
+
+
+# End action "verify-remote"
+
+
+# End action "deploy-git-remote"
+
+#######################################
+# Start action "test"
+
+#######################################
+# Testing that the site is working
+
+
+# End action "test"
+
+
+# End action "deploy-with-git-simple"
 

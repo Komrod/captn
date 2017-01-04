@@ -1,0 +1,3 @@
+07516@srv006.domsyn.fr's password: 
+Already up-to-date.
+HEAD is now at af08a57 Refactor query to display all validate offers by site
