@@ -2,7 +2,8 @@
 	"mode": "client",
 	"script":
 	{
-		"include": ["functions.captn.sh"],
+		"include": ["lib/functions.captn.sh"],
+		"extend": "lib/script.captn.json",
 		"path": "script/",
 		"true_values": ["y", "Y", "yes", "Yes", "YES", "1", "true", "ok", "yep"]
 	},

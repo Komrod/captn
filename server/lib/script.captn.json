@@ -1,29 +1,23 @@
 {
-	"script_description": "Synergie&vous API offre",
+	"script_description": "",
 	"script_warning" : "",
 	"script_delay": 0,
-
-	"ssh_host": "213.56.106.169",
-	"ssh_port": "22",
-	"ssh_user": "root",
-
-	"git_host": "srv006.domsyn.fr",
-	"git_repo": "d:/depotsGit/setv-api.git",
-	"git_user": "07516",
-	"git_branch": "develop",
-	"git_dir": "/var/www/html/setv-api/",
+	"ssh_host": "",
+	"ssh_port": "",
+	"ssh_user": "",
+	"git_host": "",
+	"git_repo": "",
+	"git_user": "",
+	"git_branch": "",
+	"git_dir": "",
 	"git_commit": "",
 	"git_commit_limit": 10,
 	"git_commit_default": "",
-	
-	"remote_dir": "/var/www/html/setv-api/",
-
+	"remote_dir": "",
 	"bin_shell": "bash",
 	"bin_php": "php",
 	"bin_phing": "phing",
-	
 	"actions": {
-		"_extended_from": "captn",
 		"default": [
 			":deploy_with_git_simple"
 		],
@@ -76,15 +70,19 @@
 		],
 
 		"clean": [
+			"# delete files in cache directory of the script",
 			"clean"
 		],
 		"clean-all": [
+			"# delete and recreate the whole cache directory of the script",
 			"captn_clean_all"
 		],
 		"clean-clone": [
+			"# delete and recreate the clone directory of the script",
 			"captn_clean_clone"
 		],
 		"check-git-remote": [
+			"# connect to remote server to check GIT commit id and branch",
 			"captn_check_git_remote"
 		],
 		"deploy-git-local": [

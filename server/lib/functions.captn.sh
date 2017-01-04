@@ -64,7 +64,7 @@ function captn_clean_all() {
 	echo "Success: script temp directory cleaned"
 }
 
-# Function to delete and recreate local temporary directory
+# Function to delete the cloned repository
 function captn_clean_clone() {
 	local function_name="captn_clean_clone"
 	echo "$function_name: Start cleaning cloned directory"

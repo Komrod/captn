@@ -1,27 +1,32 @@
 # captn
 
-Easy web server production deployment
+Easy web server deployment
 
 
 ## TODO
 
-- extend script actions from default captn actions
+- create shell script in cache directory
+- extend script actions from default captn json script
+- include files in shell script
+- change "temp" to "cache"
 - have "use_" variables instead of "skip_"
 - optional choose bash command in captn config
 - optional choose ssh command in captn config
 - optional generate archive in remote in script config
 - optional generate changelog in captn config
-- command "explain"
-- command line to return script / build script
-- change "run" command to "deploy" command
+- command line "explain"
+- command line "diagnose"
+- make a changelog action
+- command line "build" to return script (-o) or write script
 - Continue on error command option
-- if in command option
+- "if" in command option
 - pass program parameters to script
-
+- bug: captn list dont show complete script name
+- captn list must only show .json files
 - cli "-y" option to say yes to everything in batch mode
 - function to ask a response on a selected list
 - generate and store the diff of the code
-- optional generate difflog in captn config
+- optional generate changelog in captn config
 - console show default answer when pressing enter in captn_ask
 - dont delete the cloned repository of the script
 - make an action to clean everything, even the cloned directory
@@ -111,37 +116,4 @@ captn_deploy: function to apply patch to
 	# check if commit exists
 ```
 
-
-## Steps:
-
-### Start
-- infos about the script
-- warning
-- delay before continue
-
-### clean
-- delete temp dir and files
-
-### check remote server
-- connect to server by SSH
-- get branch and last commit
-
-### local clone
-- init git to HEAD of branch
-- choose the commit id to update to
-- get the log list of commits to update
-- update to selected commit
-
-### check for errors
-- lint
-
-### deploy
-- generate changlog
-- connect to server by SSH 
-- update to selected commit
-- update other files
-- empty cache
-
-### finish
-- check some urls
 
