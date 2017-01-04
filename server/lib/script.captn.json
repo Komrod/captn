@@ -23,18 +23,15 @@
 		],
 
 		"init": [
-			"# trace ERR through pipes",
+			"# Initialize some variables",
 			"set -o pipefail",
-			"# trace ERR through 'time command' and other functions",
 			"set -o errtrace",
-			"# set -u : exit the script if you try to use an uninitialised variable",
 			"set -o nounset",
-			"# set -e : exit the script if any statement returns a non-true return value",
 			"set -o errexit"
 		],
 
 		"deploy-with-git": [
-			"# This script deploy on remote server using GIT",
+			"# This script deploys on remote server using GIT",
 			":init",
 			"captn_infos",
 			":clean",
@@ -44,7 +41,7 @@
 			":test"
 		],
 		"deploy-with-git-simple": [
-			"# This script deploy on remote server using GIT",
+			"# This script deploys on remote server using GIT with just the commit id",
 			":init",
 			"captn_infos",
 			":clean",
@@ -53,7 +50,7 @@
 			":test"
 		],
 		"deploy-with-package": [
-			"# This script deploy on remote server using a package",
+			"# This script deploys on remote server using a package",
 			":init",
 			"captn_start",
 			":clean"

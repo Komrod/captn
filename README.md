@@ -18,7 +18,9 @@ Easy web server deployment
 - command line "diagnose"
 - make a changelog action
 - command line "build" to return script (-o) or write script
-- Continue on error command option
+- continue on error command option
+
+- command line option to confirm every action execution
 - "if" in command option
 - pass program parameters to script
 - bug: captn list dont show complete script name
