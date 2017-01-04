@@ -5,7 +5,6 @@ Easy web server deployment
 
 ## TODO
 
-- have "use_" variables instead of "skip_"
 - optional choose bash command in captn config
 - optional choose ssh command in captn config
 - optional generate archive in remote in script config
@@ -16,6 +15,7 @@ Easy web server deployment
 - command line "build" to return script (-o) or write script
 - continue on error command option
 
+- command line option to change script variables
 - command line option to confirm every action execution
 - "if" in command option
 - pass program parameters to script
