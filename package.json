@@ -1,5 +1,5 @@
 {
-  "name": "captn",
+  "name": "node-captn",
   "version": "0.1.0",
   "description": "Easy web server deployment",
   "main": "index.js",

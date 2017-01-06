@@ -1,4 +1,5 @@
-# captn
+# node-captn
+
 
 Easy web server deployment
 
@@ -51,7 +52,7 @@ You can also configure your script to ask for a GIT login or SSH login if you wa
 Install with npm:
 
 ```
-	npm install -g captn
+	npm install -g node-captn
 ```
 It is recommanded that you install globaly so you can run captn from anywhere.
 
