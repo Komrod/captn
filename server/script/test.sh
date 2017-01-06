@@ -1,11 +1,11 @@
 #!/bin/bash
 
 #######################################
-# Captn - deploy script
+# Captn - shell script
 #######################################
 # Name: test
 # Description: Synergie&vous API offre
-# Date: 2017-01-06 10:35:55
+# Date: 2017-01-06 11:46:08
 # Local host: SYN1506
 #######################################
 
@@ -37,8 +37,8 @@ script_file="script/test.json"
 script_json="C:\Users\PR033\git\captn\server\script\test.json"
 script_dir="C:\Users\PR033\git\captn\server\script\test"
 script_sh="C:\Users\PR033\git\captn\server\script\test.sh"
-script_action="clean-all"
-script_date="2017-01-06 10:35:55"
+script_action=""
+script_date="2017-01-06 11:46:08"
 script_local="SYN1506"
 script_true_values="y Y yes Yes YES 1 true ok yep"
 git_commit_list=""
@@ -553,12 +553,164 @@ function array_contains() {
 
 
 #######################################
-# delete and recreate the whole cache directory of the script
+# This script deploys on remote server using GIT
 
 #######################################
-captn_clean_all
+# Start action "init"
+
+#######################################
+# Initialize some variables
+
+#######################################
+set -o pipefail
 if [ $? != 0 ]; then
     (>&2 echo "Command failed. Aborting")
     exit 1;
 fi
+
+#######################################
+set -o errtrace
+if [ $? != 0 ]; then
+    (>&2 echo "Command failed. Aborting")
+    exit 1;
+fi
+
+#######################################
+set -o nounset
+if [ $? != 0 ]; then
+    (>&2 echo "Command failed. Aborting")
+    exit 1;
+fi
+
+#######################################
+set -o errexit
+if [ $? != 0 ]; then
+    (>&2 echo "Command failed. Aborting")
+    exit 1;
+fi
+
+
+# End action "init"
+
+#######################################
+captn_infos
+if [ $? != 0 ]; then
+    (>&2 echo "Command failed. Aborting")
+    exit 1;
+fi
+
+#######################################
+# Start action "clean"
+
+#######################################
+# delete files in cache directory of the script
+
+#######################################
+captn_clean
+if [ $? != 0 ]; then
+    (>&2 echo "Command failed. Aborting")
+    exit 1;
+fi
+
+
+# End action "clean"
+
+#######################################
+# Start action "check-git-remote"
+
+#######################################
+# connect to remote server to check GIT commit id and branch
+
+#######################################
+captn_check_git_remote
+if [ $? != 0 ]; then
+    (>&2 echo "Command failed. Aborting")
+    exit 1;
+fi
+
+
+# End action "check-git-remote"
+
+#######################################
+# Start action "deploy-git-local"
+
+#######################################
+# Clone project from GIT and install localy
+
+#######################################
+# Start action "clone-local"
+
+#######################################
+# Local clone project from GIT
+
+#######################################
+captn_clone_local
+if [ $? != 0 ]; then
+    (>&2 echo "Command failed. Aborting")
+    exit 1;
+fi
+
+
+# End action "clone-local"
+
+#######################################
+# Start action "install-local"
+
+
+# End action "install-local"
+
+#######################################
+# Start action "verify-local"
+
+
+# End action "verify-local"
+
+
+# End action "deploy-git-local"
+
+#######################################
+# Start action "deploy-git-remote"
+
+#######################################
+# Clone project from GIT and install on remote
+
+#######################################
+# Start action "update-git-remote"
+
+#######################################
+# Remote update from GIT with a commit id
+
+#######################################
+captn_update_git_remote
+if [ $? != 0 ]; then
+    (>&2 echo "Command failed. Aborting")
+    exit 1;
+fi
+
+
+# End action "update-git-remote"
+
+#######################################
+# Start action "install-remote"
+
+
+# End action "install-remote"
+
+#######################################
+# Start action "verify-remote"
+
+
+# End action "verify-remote"
+
+
+# End action "deploy-git-remote"
+
+#######################################
+# Start action "test"
+
+#######################################
+# Testing that the site is working
+
+
+# End action "test"
 

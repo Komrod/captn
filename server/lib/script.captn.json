@@ -88,11 +88,13 @@
 			"captn_check_git_remote"
 		],
 		"deploy-git-local": [
+			"# Clone project from GIT and install localy",
 			":clone-local",
 			":install-local",
 			":verify-local"
 		],
 		"deploy-git-remote": [
+			"# Clone project from GIT and install on remote",
 			":update-git-remote",
 			":install-remote",
 			":verify-remote"
@@ -101,6 +103,7 @@
 			"# Testing that the site is working"
 		],
 		"clone-local": [
+			"# Local clone project from GIT",
 			"captn_clone_local"
 		],
 		"update-local": [],
@@ -109,6 +112,7 @@
 		"verify-remote": [],
 		"install-local": [],
 		"update-git-remote": [
+			"# Remote update from GIT with a commit id",
 			"captn_update_git_remote"
 		],
 		"install-remote": []
