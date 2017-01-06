@@ -5,13 +5,8 @@
 #######################################
 # Name: test
 # Description: Synergie&vous API offre
-# Date: 2017-01-06 10:06:23
+# Date: 2017-01-06 10:35:55
 # Local host: SYN1506
-# SSH user: root
-# SSH server: 213.56.106.169:22
-# GIT user: 07516
-# GIT repository: d:/depotsGit/setv-api.git
-# Target dir: /var/www/html/setv-api/
 #######################################
 
 
@@ -43,7 +38,7 @@ script_json="C:\Users\PR033\git\captn\server\script\test.json"
 script_dir="C:\Users\PR033\git\captn\server\script\test"
 script_sh="C:\Users\PR033\git\captn\server\script\test.sh"
 script_action="clean-all"
-script_date="2017-01-06 10:06:23"
+script_date="2017-01-06 10:35:55"
 script_local="SYN1506"
 script_true_values="y Y yes Yes YES 1 true ok yep"
 git_commit_list=""
@@ -107,9 +102,8 @@ function captn_clean() {
 function captn_clean_all() {
 	echo "$FUNCNAME: Start cleaning"
 	echo "$FUNCNAME: script cache directory is \"$script_dir\""
-	echo "$FUNCNAME: deleting directory"
+	echo "$FUNCNAME: deleting cache directory"
 	rm -fr "$script_dir"
-exit 0;	
 	# Check delete error
 	if [ $? != 0 ]; then
 		(>&2 echo "$FUNCNAME: failed to delete directory. Aborting")

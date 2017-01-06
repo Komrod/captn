@@ -53,9 +53,8 @@ function captn_clean() {
 function captn_clean_all() {
 	echo "$FUNCNAME: Start cleaning"
 	echo "$FUNCNAME: script cache directory is \"$script_dir\""
-	echo "$FUNCNAME: deleting directory"
+	echo "$FUNCNAME: deleting cache directory"
 	rm -fr "$script_dir"
-exit 0;	
 	# Check delete error
 	if [ $? != 0 ]; then
 		(>&2 echo "$FUNCNAME: failed to delete directory. Aborting")
