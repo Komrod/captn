@@ -2,120 +2,175 @@
 
 Easy web server deployment
 
+This is a prototype.
 
-## TODO
+## Requires
 
-- optional generate archive in remote in script config
-- optional generate changelog in captn config
-- command line "explain"
-- command line "diagnose"
-- make a changelog action
-- command line "build" to return script (-o) or write script
-- continue on error command option
+Captn will run on Linux and Windows as long as you have those things:
+- Bash shell commands on client and server
+- Node
+- GIT (optional)
+- Remote server with SSH access
+- Installed SSH keys to autoconnect
 
-- command line option to change script variables
-- command line option to confirm every action execution
-- "if" in command option
-- pass program parameters to script
-- bug: captn list dont show complete script name
-- captn list must only show .json files
-- cli "-y" option to say yes to everything in batch mode
-- function to ask a response on a selected list
-- generate and store the diff of the code
-- optional generate changelog in captn config
-- console show default answer when pressing enter in captn_ask
-- dont delete the cloned repository of the script
-- make an action to clean everything, even the cloned directory
-- action to test SSH
-- lint the shell scripts before running
-- command to build script
-- put colors directly in script
-- describe main actions and sub actions in readme
-- show commits with current colored in captn_commit
-- script warning on multiple lines
-- ignore log of some strings with regex
-- optional choose ssh command in captn config
+It's pretty standard for Linux. On windows, you can install GIT bash that will provide GIT commands and Bash commands when you launch a Bash console.
 
 
-## DONE
+There is many ways to configure captn and deploy your project on the server.
 
-- add $FUNCNAME in start of echo
-- write logs
-- change "temp" to "cache"
-- include files in shell script
-- extend script actions from default captn json script
-- error check step
-- update remote server step
-- multiple actions in one script
-- create one action for every step
-- pass to shell all the variables inside script config except object
-- skip checking remote commit if git_commit_remote is filled
-- message "press [ctrl-c] at any time to quit"
-- function to ask if you want to continue
-- function to ask a question
-- cloning step
-- show questions
-- redirect stdin
-- optional skip command
-- Delay before continuing at startup
-- Make the variables
-- Make the functions
-- Show warning message at startup
-- Build script
-- Show warning in yellow and success in green
+Regular features include:
+- Verify commit id from GIT on client
+- Ask for commit id to deploy
+- Clone and verify site on client machine
+- archive on remote server
+- Deploy on remote from the GIT server
+- Build a package on client machine
+- Deplot package on remote server
 
 
-## In shell
+Different approach on how to deploy from a developper client machine :
 
-script_json: absolute path for the json file of the script
-script_sh: absolute path for the sh file of the script
-script_name: name of the script
-script_target: target directory of the site to deploy
-script_date: current date
-script_temp: temporary directory for the script
+```
+Cilent		---	Deploy ---> 	Remote server
+Run captn						Website
 
-git_host:
-git_user:
-git_branch_remote:
-git_branch:
-git_commit:
-git_commit_remote:
+Client		--- Connect -->		Captn server	--- Deploy --->		Remote server
+Run SSH							Run captn							Website
+```
+The GIT and SSH can be configured in
+You can also configure your script to ask for a GIT login or SSH login if you want.
 
-ssh_host:
-ssh_port:
-ssh_user:
+## Quick start
 
-skip_check: if true value, skip the captn_git_check
-skip_patch: if true value, skip the captn_git_patch and captn_apply
-skip_deploy: if true value, skip the captn_deploy
+### Install
 
-captn_dir: root directory of captn
-captn_version: version of captn
+Install with npm:
+
+```
+	npm install -g captn
+```
+
+### Make your own project
+
+It is recommanded that you install globaly so you can run captn from anywhere.
+You can then initialize your script project. Simply create a directory, go inside it and run "captn init" :
+
+```
+	mkdir kirk
+	cd kirk
+	captn init
+```
+
+This will create the directories and files to run default actions and commands.
+
+```
+	- lib/
+		- functions.captn.sh
+		- script.captn.json
+	- log/
+		- captn.log
+	- script/
+		- example.json
+	- captn.json
+```
+
+### Edit and run
+
+You can now edit the file "script/example.json" to complete with your own informations.
+
+Feel free to create a new .json file in the "script/" directory. The new script will appear if you run "captn list".
+If you configure correctly the variables inside your .json file (GIT, SSH ...), you will be able to connect automatically to the server by SSH
+
+Running the script
+
+```
+	captn run example
+```
+This will run the default script.
+
+```
+	captn run example:archive-remote
+```
+This will create an archive in the remote server to save the data if needed.
+For beginners or when you are developping your script, it is recommanded to use the verbose option "-v"
+```
+	captn run example:archive-remote -v
+```
+This will show extra output to explain what is going on.
+
+### Share the project by GIT
+
+Your captn project with your scripts
 
 
-true values: "y", "Y", "yes", "Yes", "YES", "1", "true", "ok", "yep"
+## captn commands
+
+When you are in the root directory of your project, you can run the captn commands. For example, run command "captn list" in the shell will display the list of available scripts
+
+### list
+
+```
+	captn list
+```
+
+Show a list of scripts. Each script can be configured to deploy a project on a server.
+Each script name corresponds to a json file inside the script directory, by default "script/".
+
+### run
+
+```
+	captn run <script>
+	captn run <script>:<action>
+```
+
+If you omit the action, the default action is executed
+
+### Explain
+
+```
+	captn explain <script>
+	captn explain <script>:<action>
+```
+
+This command take the first comment of every actions that is launched by the selected script action. Execute "captn explain <script>" to see the explanation of the default action. Execute "captn explain <script>:<action>" to see the explanation of a particular action.
+
+### Options
+
+You can add 
+
+## How to cutomize your script
+
+### Just adding a simple command
+
+### Calling an action
+
+A call to an action always begins with ":". So, in the command string,
+
+```
+	...
+	"actions": {
+		"my-action": [
+			"ls -l",
+			":deploy-with-git"
+		],
+		...
+	}
+```
+This is an action called "my-action" that has 2 commands. When it runs, it executes "ls -l" on local machine and is calling "deploy-with-git" action. The "deploy-with-git" action can call other actions too.
+
+If you want to see all the chain of actions, just call "captn explain example:my-action".
+
+### More complex commands
+
+
+## Actions
+
 
 
 ## Functions
 
-captn_start: function to display informations, warning at startup
-captn_clean: function to clean temporary directory and files
-captn_check: function to check if git branch is ready
-captn_patch: function to get the patch between the 2 branches
-captn_deploy: function to apply patch to 
+## Changelog
 
-
-## Git example
-
-```
-	git rev-parse HEAD 
-	# get last commit id
-	
-	git log edcfc6184b5cb30e29c0da3ccdec296379d3c7b8..0efeb3800396e15717b4f15fb572f5886fa49c50  --pretty=format:"%H - %cn, %ad : %s" 
-	# get list of commits to update
-	
-	git cat-file -t 0efeb3800396e15717b4f15fb572f5886fa49c51 
-	# check if commit exists
-```
-
+### V0.1 First version
+- Run scripts
 

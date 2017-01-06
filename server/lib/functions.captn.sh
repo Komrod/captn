@@ -93,7 +93,7 @@ function captn_check_git_remote() {
 	echo "$FUNCNAME: getting branch from remote server"
 	echo "$FUNCNAME: connecting to $ssh_host:$ssh_port"
 	{
-		ssh -tt -p $ssh_port $ssh_user@$ssh_host "cd $git_dir && git rev-parse --abbrev-ref HEAD && git rev-parse HEAD"
+		ssh -tt -p $ssh_port $ssh_user@$ssh_host "cd $remote_dir && git rev-parse --abbrev-ref HEAD && git rev-parse HEAD"
 	} > $script_dir/remote.txt 2> /dev/null
 	return_code=$?
 	if [ $(grep -c "fatal" $script_dir/remote.txt) -ne 0 ]; then
@@ -121,7 +121,7 @@ function captn_check_git_remote() {
 		exit 1;
 	fi
 	if [ "$git_branch_remote" != "$git_branch" ]; then
-		(>&2 echo "$FUNCNAME: server branch \"$git_branch_remote\" in \"$git_dir\" is supposed to be \"$git_branch\".")
+		(>&2 echo "$FUNCNAME: server branch \"$git_branch_remote\" in \"$remote_dir\" is supposed to be \"$git_branch\".")
 		exit 1;
 	fi
 	echo "Success: remote server branch is \"$git_branch_remote\""
@@ -134,7 +134,7 @@ function captn_archive_remote() {
 	echo "$FUNCNAME: connecting to $ssh_host:$ssh_port"
 	local now=$(date +"%Y-%d-%m-%T")
 	now=$(echo $now | sed -e "s/\:/\-/g")
-	captn_ssh "$archive_command ${archive_dir}${archive_name}_${now}${archive_extension} ${remote_dir}"
+	captn_ssh "cd $archive_dir && $archive_command ${archive_dir}${archive_name}_${now}${archive_extension} ${remote_dir}"
 	if [ $? != 0 ]; then
 	    (>&2 echo "Could not create archive. Aborting")
 	    exit 1;
@@ -342,9 +342,9 @@ function captn_verify_local() {
 
 function captn_deploy_remote() {
 	echo "$FUNCNAME: start"
-	root="$git_dir/"
+	root="$remote_dir/"
 
-	# compoer update / install
+	# composer update / install
 }
 
 
@@ -362,7 +362,7 @@ function captn_update_git_remote() {
 	echo "$FUNCNAME: connecting to $ssh_host:$ssh_port"
 	{
 		# eventually add git pull 
-		ssh -tt -p $ssh_port $ssh_user@$ssh_host "cd $git_dir && git pull && git reset $git_commit --hard"
+		ssh -tt -p $ssh_port $ssh_user@$ssh_host "cd $remote_dir && git pull && git reset $git_commit --hard"
 	} > $script_dir/remote_update.txt 2> /dev/null
 	return_code=$?
 	if [ $(grep -c "fatal" $script_dir/remote_update.txt) -ne 0 ]; then
@@ -385,7 +385,7 @@ function captn_update_git_remote() {
 
 function captn_verify_remote() {
 	echo "$FUNCNAME: start"
-	root="$git_dir/"
+	root="$remote_dir/"
 
 	# lint some files
 }
