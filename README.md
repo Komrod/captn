@@ -5,8 +5,6 @@ Easy web server deployment
 
 ## TODO
 
-- optional choose bash command in captn config
-- optional choose ssh command in captn config
 - optional generate archive in remote in script config
 - optional generate changelog in captn config
 - command line "explain"
@@ -36,10 +34,12 @@ Easy web server deployment
 - show commits with current colored in captn_commit
 - script warning on multiple lines
 - ignore log of some strings with regex
+- optional choose ssh command in captn config
 
 
 ## DONE
 
+- add $FUNCNAME in start of echo
 - write logs
 - change "temp" to "cache"
 - include files in shell script

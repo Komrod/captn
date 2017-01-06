@@ -1,6 +1,7 @@
 {
 	"script":
 	{
+		"shell": "bash",
 		"include": ["lib/functions.captn.sh"],
 		"extend": "lib/script.captn.json",
 		"path": "script/",

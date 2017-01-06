@@ -14,9 +14,11 @@
 	"git_commit_limit": 10,
 	"git_commit_default": "",
 	"remote_dir": "",
-	"bin_shell": "bash",
-	"bin_php": "php",
-	"bin_phing": "phing",
+	"archive_remote": 0,
+	"archive_dir": "",
+	"archive_name": "setv-api",
+	"archive_command": "tar cpvzf",
+	"archive_extension": ".tar.gz",
 	"actions": {
 		"default": [
 			":deploy-with-git"
@@ -65,7 +67,10 @@
 			":deploy-package",
 			":test"
 		],
-
+		"archive-remote": [
+			"# Build an archive on remote server",
+			"captn_archive_remote"
+		],
 		"clean": [
 			"# delete files in cache directory of the script",
 			"captn_clean"

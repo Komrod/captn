@@ -3,6 +3,7 @@
 	"ssh_host": "213.56.106.169",
 	"ssh_port": "22",
 	"ssh_user": "root",
+	
 	"git_host": "srv006.domsyn.fr",
 	"git_repo": "d:/depotsGit/setv-api.git",
 	"git_user": "07516",
@@ -10,7 +11,12 @@
 	"git_dir": "/var/www/html/setv-api/",
 	"git_commit_limit": 10,
 	"git_commit_default": "",
+	
+	"archive_remote": 0,
+	"archive_dir": "/var/www/",
+
 	"remote_dir": "/var/www/html/setv-api/",
+	
 	"actions": {
 		"default": [
 			":deploy-with-git-simple"
