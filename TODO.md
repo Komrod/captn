@@ -1,25 +1,24 @@
 ## TODO
 
-- optional generate changelog in captn config
-- command line "diagnose"
-- make a changelog action
-- command line "build" to return script (-o) or write script
 - continue on error command option
-- command line option to change script variables
-- command line option to confirm every action execution
+- make a changelog action
+- cli option to change script variables
+- cli option to confirm every action execution
 - "if" in command option
-- pass program parameters to script
 - bug: captn list dont show complete script name
 - captn list must only show .json files
-- cli "-y" option to say yes to everything in batch mode
-- function to ask a response on a selected list
-- generate and store the diff of the code
+- cli option "-y" to say yes to everything in batch mode
 - optional generate changelog in captn config
-- console show default answer when pressing enter in captn_ask
 - dont delete the cloned repository of the script
 - make an action to clean everything, even the cloned directory
-- action to test SSH
+- action to test SSH, GIT
+
+- function to ask a response on a selected list
+- command line "build" to return script (-o) or write script
+- command line "diagnose"
 - lint the shell scripts before running
+
+- console show default answer when pressing enter in captn_ask
 - command to build script
 - put colors directly in script
 - describe main actions and sub actions in readme
@@ -32,6 +31,9 @@
 
 ## DONE
 
+- bug: fix captn init from example
+- no log for init
+- v0.1.0
 - command line "explain"
 - optional generate archive in remote in script config
 - add $FUNCNAME in start of echo
