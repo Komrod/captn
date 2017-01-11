@@ -22,7 +22,8 @@ Captn will run on Linux and Windows as long as you have those things:
 - Bash shell commands on client machine and remote server
 - Node on client machine
 - GIT on client machine and remote server
-- SSH access to remote server and installed SSH keys to autoconnect
+- SSH access to remote server and to GIT
+- Installed SSH keys to autoconnect from client machine and from remote server
 
 
 It's pretty standard for Linux. On windows, you can install GIT bash that will provide GIT commands and Bash shell when you launch a Bash console.
@@ -124,12 +125,14 @@ Or put the action ":deploy-with-git" in the default action then run it like this
 - Remote final directory (remote_dir) must be a GIT directory
 
 #### The steps
+```
 1 - Connecting to the remote server to get the last commit id and check the branch
 2 - Cloning project / using the cloned directory on local machine
 3 - Choose the commit id to update to
 4 - Generate changelog from last commit id to new commit id
 5 - Update the remote server after being pretty sure everything is fine
 6 - Do some test to see the server is still working (if provided)
+```
 
 
 If you want to test some urls in the end, you should add your own commands to the ":test" action.
@@ -164,10 +167,11 @@ Or put the action ":deploy-with-git-simple" in the default action then run it li
 
 
 #### The steps
+```
 1 - Choose the commit id to update to (no list)
 2 - Update the remote server (without much verifications)
 3 - Do some test to see the server is still working (if provided)
-
+```
 
 If you want to test some urls in the end, you should add your own commands to the ":test" action.
 
@@ -200,8 +204,8 @@ Each script name corresponds to a json file inside the script directory, by defa
 ### run
 
 ```
-	captn run <script>
-	captn run <script>:<action>
+	captn run <script-name>
+	captn run <script-name>:<action-name>
 ```
 
 If you omit the action, the default action is executed
@@ -209,11 +213,11 @@ If you omit the action, the default action is executed
 ### Explain
 
 ```
-	captn explain <script>
-	captn explain <script>:<action>
+	captn explain <script-name>
+	captn explain <script-name>:<action-name>
 ```
 
-This command take the first comment of every actions that is launched by the selected script action. Execute "captn explain <script>" to see the explanation of the default action. Execute "captn explain <script>:<action>" to see the explanation of a particular action.
+This command take the first comment of every actions that is launched by the selected script action. Execute "captn explain script-name" to see the explanation of the default action. Execute "captn explain script-name:action-name" to see the explanation of a particular action.
 
 ### Options
 
