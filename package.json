@@ -1,6 +1,6 @@
 {
   "name": "node-captn",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Easy web server deployment",
   "main": "index.js",
   "scripts": {
@@ -14,10 +14,18 @@
     "web",
     "website",
     "shell",
+    "commit",
+    "git",
+    "node",
+    "server",
     "deployment",
     "deploy script",
     "deploy node",
     "deploy app",
+    "deploy server",
+    "deploy git",
+    "deploy commit",
+    "deploy with git",
     "production",
     "developper"
   ],
