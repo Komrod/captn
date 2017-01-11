@@ -4,7 +4,7 @@ Easy web server deployment
 
 This is a prototype.
 
-For the moment, it deploys only GIT content but captn is easy to modify by adding your own commands when you want them or using captn built-in functions.
+For the moment, it deploys only GIT content but captn is easy to modify by adding your own commands where you want them or using captn built-in functions.
 
 *Features include:*
 - Ask for commit id to deploy
@@ -32,10 +32,9 @@ It's pretty standard for Linux. On windows, you can install GIT bash that will p
 There is many ways to configure captn and deploy your project on the server.
 
 
-The GIT and SSH users are configured in the script config json file. It is highly recommanded that an auto connection is configured for GIT and SSH users otherwise the scripts can stop on password prompt or may be not work at all, who knows.
+The GIT and SSH users are configured in the script config json file (in script/example.json). It is highly recommanded that an auto connection is configured for GIT and SSH users otherwise the scripts can stop on password prompt or may not work at all, who knows.
 
-You can also configure your script to ask for a GIT login or SSH login if you want.
-Additional behaviors can be added as shell commands, functions or calls to captn actions.
+You can also configure your script to ask for a GIT login or SSH login if you want. Additional behaviors can be added as shell commands, functions or calls to captn actions.
 
 
 ## Quick start
@@ -70,14 +69,15 @@ This will create the directories and files to run default actions and commands.
 	- script/
 		- example.json
 	- captn.json
+	- .gitignore
 ```
 
 ### Edit and run
 
-You can now edit the file "script/example.json" to complete with your own informations.
+You can now edit the file "script/example.json" to complete it with your own informations.
 
 Feel free to create a new .json file in the "script/" directory. The new script will appear if you run "captn list".
-Remember that all the actions by default are extended from "lib/script.captn.json". You can override them in your user script file.
+Remember that all the actions by default are extended from "lib/script.captn.json". You can override them in your user script file by creating an action with the same name.
 
 If you configure correctly the variables inside your .json file (GIT, SSH ...), you will be able to connect automatically to the server by SSH.
 
@@ -99,11 +99,51 @@ For beginners or when you are developping your script, it is recommanded to use 
 This will show extra output to explain what is going on.
 
 
+## captn commands
+
+When you are in the root directory of your project, you can run the captn commands. For example, run command "captn list" in the shell will display the list of available scripts
+
+### list
+
+```
+	captn list
+```
+
+Show a list of scripts. Each script can be configured to deploy a project on a server.
+Each script name corresponds to a json file inside the script directory, by default "script/".
+
+### run
+
+```
+	captn run <script-name>
+	captn run <script-name>:<action-name>
+```
+
+If you omit the action, the default action is executed
+
+### Explain
+
+```
+	captn explain <script-name>
+	captn explain <script-name>:<action-name>
+```
+
+This command take the first comment of every actions that is launched by the selected script action. Execute "captn explain script-name" to see the explanation of the default action. Execute "captn explain script-name:action-name" to see the explanation of a particular action.
+
+### Options
+
+You can add an option when you run captn.
+
+### Verbose: -v or --verbose
+
+Show more text on the console on what is going on.
+
+
 ## Deploy methods
 
 ### deploy-with-git
 
-Deploys the GIT repository content as it is with verification of branch, commit ids on local machine and remote server
+Deploys the GIT repository content as it is with verification of branch, commit ids on local machine and remote server and generate a changelog
 
 
 Run the script like this:
@@ -188,57 +228,19 @@ Figure out how it works yourself.
 Your captn project with your scripts can be store on a GIT repository and shoared with many developpers. Depending on what user can connect to the remote server, you can esaily handle security on who can deploy.
 
 
-## captn commands
-
-When you are in the root directory of your project, you can run the captn commands. For example, run command "captn list" in the shell will display the list of available scripts
-
-### list
-
-```
-	captn list
-```
-
-Show a list of scripts. Each script can be configured to deploy a project on a server.
-Each script name corresponds to a json file inside the script directory, by default "script/".
-
-### run
-
-```
-	captn run <script-name>
-	captn run <script-name>:<action-name>
-```
-
-If you omit the action, the default action is executed
-
-### Explain
-
-```
-	captn explain <script-name>
-	captn explain <script-name>:<action-name>
-```
-
-This command take the first comment of every actions that is launched by the selected script action. Execute "captn explain script-name" to see the explanation of the default action. Execute "captn explain script-name:action-name" to see the explanation of a particular action.
-
-### Options
-
-You can add an option when you run captn.
-
-### Verbose: -v or --verbose
-
-Show more text on the console on what is going on.
-
-
 ## How to cutomize your script
 
 ### Just adding a simple command
 
-You can add a simple command just by adding 
+You can add a simple command just by adding a string in the action array.
+
+Below is an example
 
 ```
 	...
 	"actions": {
 		"my-action": [
-			""
+			"ls"
 		],
 		...
 	}
@@ -252,7 +254,6 @@ You can continu on error by doing a more complex command with options (example b
 ### Use global variables
 
 You can use all the variables inside your .json script file in your commands (except the action list). Just use "$" and the name of the variable.
-In your .json file "script_cache" is
 
 ```
 	...
@@ -264,7 +265,7 @@ In your .json file "script_cache" is
 	}
 ```
 
-Remember that when changing current directory on local machine, it will keep it as the current directory for the rest of the script until changed.
+Remember that when changing current directory on local machine, it will keep it as the current directory for the rest of the script, until changed.
 If you want to be sure to be on the right directory, just use "cd" command on the beginning of your action.
 
 ### Echo warning Error Success
@@ -276,10 +277,10 @@ Warnings, errors and success are visible without the verbose mode. All others ar
 	...
 	"actions": {
 		"my-action": [
-			"echo "Warning: this is a warning",
-			"echo "Error: this is an error",
-			"echo "Success: this is a success",
-			"echo "This will not show without verbose mode"
+			"echo \"Warning: this is a warning\"",
+			"echo \"Error: this is an error\"",
+			"echo \"Success: this is a success\"",
+			"echo \"This will not show without verbose mode\""
 		],
 		...
 	}
@@ -311,25 +312,27 @@ You also should NOT put a command on multiple lines (like when using "if").
 		"my-action": [
 			"echo "Warning: next command has options",
 			{
-				exec: "ls",
-				onError: "Command failed horribly"
+				exec: "ls error/",
+				echoOnError: "Command failed horribly"
 			}
 		],
 		...
 	}
 ```
 
+Available options:
 - exec: the command to execute or the action to add here
 - echoOnError: show on console on error
 - echoOnSuccess: show on console on success
 - echoBefore: show on console before the execution of the command
 
-To fix: as the BASH shell is in buffered mode, in some case the stderr and stdout are mixed and error can show before some echo. A solution is to wait 1ms after every command, which is not very clean so we might consider something else.
+To fix: as the BASH shell is in buffered mode, in some cases the stderr and stdout are not properly mixed and error can be shown before some echo that comes first. A solution is to wait 1ms after every command, which is not very clean so we might consider something else.
 
 
 ### Calling an action
 
 An action of your script is a set of shell commands (run program or function with parameters) or some calls to other actions.
+The first line can be a shell comment to explain what the action do. That comment is also shown with the "captn explain" command.
 
 A call to an action always begins with ":". So, in the command string,
 
