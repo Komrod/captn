@@ -1,26 +1,12 @@
-# node-captn
-
+# Captn
 
 Easy web server deployment
 
 This is a prototype.
 
+For the moment, it deploys only GIT content but captn is easy to modify by adding your own commands when you want them or using captn built-in functions.
 
-## Requires
-
-Captn will run on Linux and Windows as long as you have those things:
-- Bash shell commands on client and server
-- Node
-- GIT (optional)
-- Remote server with SSH access
-- Installed SSH keys to autoconnect
-
-It's pretty standard for Linux. On windows, you can install GIT bash that will provide GIT commands and Bash shell when you launch a Bash console.
-
-
-There is many ways to configure captn and deploy your project on the server.
-
-Regular features include:
+*Features include:*
 - Ask for commit id to deploy
 - Verify commit id with GIT server on client machine
 - Clone and verify project on client machine
@@ -28,6 +14,21 @@ Regular features include:
 - Deploy on remote from the GIT server
 - Log everything
 - Stop script on critical error
+
+
+## Requires
+
+Captn will run on Linux and Windows as long as you have those things:
+- Bash shell commands on client machine and remote server
+- Node on client machine
+- GIT on client machine and remote server
+- SSH access to remote server and installed SSH keys to autoconnect
+
+
+It's pretty standard for Linux. On windows, you can install GIT bash that will provide GIT commands and Bash shell when you launch a Bash console.
+
+
+There is many ways to configure captn and deploy your project on the server.
 
 
 The GIT and SSH users are configured in the script config json file. It is highly recommanded that an auto connection is configured for GIT and SSH users otherwise the scripts can stop on password prompt or may be not work at all, who knows.
@@ -95,6 +96,7 @@ For beginners or when you are developping your script, it is recommanded to use 
 	captn run example:archive-remote -v
 ```
 This will show extra output to explain what is going on.
+
 
 ## Deploy methods
 
@@ -174,11 +176,12 @@ If you want to test some urls in the end, you should add your own commands to th
 
 ### archive-remote
 
+Figure out how it works yourself.
 
 
 ### Share the project by GIT
 
-Your captn project with your scripts
+Your captn project with your scripts can be store on a GIT repository and shoared with many developpers. Depending on what user can connect to the remote server, you can esaily handle security on who can deploy.
 
 
 ## captn commands
@@ -320,7 +323,32 @@ You also should NOT put a command on multiple lines (like when using "if").
 To fix: as the BASH shell is in buffered mode, in some case the stderr and stdout are mixed and error can show before some echo. A solution is to wait 1ms after every command, which is not very clean so we might consider something else.
 
 
-### Ask the captain
+### Calling an action
+
+An action of your script is a set of shell commands (run program or function with parameters) or some calls to other actions.
+
+A call to an action always begins with ":". So, in the command string,
+
+```
+	...
+	"actions": {
+		"my-action": [
+			"ls -l",
+			":deploy-with-git"
+		],
+		...
+	}
+```
+This is an action called "my-action" that has 2 commands. When it runs, it executes "ls -l" on local machine and is calling "deploy-with-git" action. The "deploy-with-git" action can call other actions too.
+
+If you want to see all the chain of actions, just call "captn explain example:my-action".
+
+
+## Shell functions
+
+Yep, there are shell functions.
+
+### captn_ask
 
 There is a common function to ask the user an information.
 The response is stored on the "response" global variable.
@@ -349,40 +377,6 @@ You can also ask the user if he wants to continue based on some informations. To
 	captn_ask_continue "no"
 ```	
 
-
-### Calling an action
-
-An action of your script is a set of shell commands (run program or function with parameters) or some calls to other actions.
-
-A call to an action always begins with ":". So, in the command string,
-
-```
-	...
-	"actions": {
-		"my-action": [
-			"ls -l",
-			":deploy-with-git"
-		],
-		...
-	}
-```
-This is an action called "my-action" that has 2 commands. When it runs, it executes "ls -l" on local machine and is calling "deploy-with-git" action. The "deploy-with-git" action can call other actions too.
-
-If you want to see all the chain of actions, just call "captn explain example:my-action".
-
-
-
-
-## Actions
-
-### deploy-with-git
-
-This action will:
-- 
-
-
-
-## Functions
 
 ## Changelog
 
