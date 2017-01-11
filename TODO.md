@@ -1,6 +1,5 @@
 ## TODO
 
-- continue on error command option
 - make a changelog action
 - cli option to change script variables
 - cli option to confirm every action execution
@@ -13,11 +12,14 @@
 - make an action to clean everything, even the cloned directory
 - action to test SSH, GIT
 
+- detects action infinite loop
+- retrieve GIT project by url (github like)
 - function to ask a response on a selected list
 - command line "build" to return script (-o) or write script
 - command line "diagnose"
 - lint the shell scripts before running
 
+- function to disable and enable ctrl-c
 - console show default answer when pressing enter in captn_ask
 - command to build script
 - put colors directly in script
@@ -31,8 +33,15 @@
 
 ## DONE
 
-- bug: fix captn init from example
-- no log for init
+- tweak deploy with git
+- fix: clean action doe not delete all the files
+- deleting script variable git_dir
+- echoBefore command option
+- continue on error command option
+- add echoOnError and echoOnSuccess
+- fix captn init
+- fix output in stdout sometimes does not render when exiting
+- disable log for init
 - v0.1.0
 - command line "explain"
 - optional generate archive in remote in script config

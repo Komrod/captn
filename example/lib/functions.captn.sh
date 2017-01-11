@@ -27,36 +27,57 @@ function captn_infos() {
 #################################################
 # Clean
 
+
 # Function to clean local cache files
 function captn_clean() {
 	echo "$FUNCNAME: Start cleaning"
 	echo "$FUNCNAME: script cache directory is \"$script_dir\""
-	echo "$FUNCNAME: deleting all files in directory"
-	rm -fr "$script_dir/*.*"
-	# Check delete error
+	echo "$FUNCNAME: deleting all files in cache directory"
+	cd "$script_dir"
 	if [ $? != 0 ]; then
-		(>&2 echo "$FUNCNAME: failed to delete directory. Aborting")
+		(>&2 echo "$FUNCNAME: failed to change directory to \"$script_dir\". Aborting")
 		exit 1;
 	fi
-	if [ ! -d $script_dir ]; then
-		mkdir "$script_dir"
-		# Check creation error
-		if [ $? != 0 ]; then
-			(>&2 echo "$FUNCNAME: failed to create directory. Aborting")
-			exit 1;
-		fi
+
+	local files=(`captn_dir_files ./`)
+	local num=${#files[@]}
+	echo "$FUNCNAME: found $num file(s)"
+	if [ $num -ne 0 ]; then
+		for i in "${files[@]}"; do
+			rm "$i"; 
+		done
+	fi
+	# Check delete error
+	if [ $? != 0 ]; then
+		(>&2 echo "$FUNCNAME: failed to delete files. Aborting")
+		exit 1;
+	fi
+	local files=(`captn_dir_files ./`)
+	if [ ${#files[@]} -ne 0 ]; then
+		(>&2 echo "$FUNCNAME: failed to delete all the files. Aborting")
+		exit 1
 	fi
 	echo "Success: script cache files cleaned"
+	return 0
 }
+
 
 # Function to delete and recreate local cache directory
 function captn_clean_all() {
 	echo "$FUNCNAME: Start cleaning"
 	echo "$FUNCNAME: script cache directory is \"$script_dir\""
 	echo "$FUNCNAME: deleting cache directory"
+	if [ ! -d "$script_dir" ]; then
+		(>&2 echo "$FUNCNAME: failed to find cache directory. Aborting")
+		exit 1;
+	fi
 	rm -fr "$script_dir"
 	# Check delete error
 	if [ $? != 0 ]; then
+		(>&2 echo "$FUNCNAME: failed to delete directory. Aborting")
+		exit 1;
+	fi
+	if [ -d "$script_dir" ]; then
 		(>&2 echo "$FUNCNAME: failed to delete directory. Aborting")
 		exit 1;
 	fi
@@ -67,14 +88,22 @@ function captn_clean_all() {
 		(>&2 echo "$FUNCNAME: failed to create directory. Aborting")
 		exit 1;
 	fi
+	if [ ! -d "$script_dir" ]; then
+		(>&2 echo "$FUNCNAME: failed to create directory. Aborting")
+		exit 1;
+	fi
 	echo "Success: script cache directory cleaned"
 }
+
 
 # Function to delete the cloned repository
 function captn_clean_clone() {
 	echo "$FUNCNAME: Start cleaning cloned directory"
 	echo "$FUNCNAME: script cache directory is \"$script_dir\""
 	echo "$FUNCNAME: deleting cloned directory"
+	if [ ! -d "$script_dir/clone/" ]; then
+		echo "Warning: no clone directory"
+	fi
 	rm -fr "$script_dir/clone/"
 	# Check delete error
 	if [ $? != 0 ]; then
@@ -82,6 +111,7 @@ function captn_clean_clone() {
 		exit 1;
 	fi
 	echo "Success: script clone directory deleted"
+	return 0
 }
 
 
@@ -97,7 +127,7 @@ function captn_check_git_remote() {
 	} > $script_dir/remote.txt 2> /dev/null
 	return_code=$?
 	if [ $(grep -c "fatal" $script_dir/remote.txt) -ne 0 ]; then
-		(>&2 cat $script_dir/remote_branch.txt)
+		(>&2 cat $script_dir/remote.txt)
 		(>&2 echo "$FUNCNAME: failed to get the remote branch name. Aborting")
 		exit 1;
 	fi
@@ -153,24 +183,45 @@ function captn_clone_local() {
 	############################################
 	# cloning
 	echo "$FUNCNAME: start"
-	cd "$script_dir"
-	if [ $? != 0 ]; then
-	    (>&2 echo "Could not change dir to \"$script_dir\". Aborting")
+	if [ ! -d $script_dir ]; then
+	    (>&2 echo "Could not find cache directory \"$script_dir\". Aborting")
 	    exit 1;
 	fi
 	
-	result=$( (git clone $git_user@$git_host:$git_repo clone) 2> /dev/null )
-	if [ $? != 0 ]; then
-	    (>&2 echo "$result")
-	    (>&2 echo "Could not clone project \"$git_repo\". Aborting")
-	    exit 1;
+	if [ -d "$script_dir/clone/" ]; then
+		echo "$FUNCNAME: clone directory already exists"
+
+		cd "$script_dir/clone/"
+		if [ $? != 0 ]; then
+		    (>&2 echo "Could not change to dir \"$script_dir/clone/\". Aborting")
+		    exit 1;
+		fi
+
+		result=$( (git status) 2> /dev/null )
+		if [ $? != 0 ]; then
+		    echo "Warning: could not get status of dir \"$script_dir/clone/\""
+		    echo "$FUNCNAME: deleting invalid clone directory"
+		    captn_clean_clone
+		    echo "Success: Clone directory deleted"
+		fi
 	fi
-	cd "$script_dir/clone"
-	if [ $? != 0 ]; then
-	    (>&2 echo "Could not change dir to \"$script_dir/clone/\". Aborting")
-	    exit 1;
+
+
+	if [ ! -d "$script_dir/clone/" ]; then
+		result=$( (git clone $git_user@$git_host:$git_repo clone) 2> /dev/null )
+		if [ $? != 0 ]; then
+		    (>&2 echo "$result")
+		    (>&2 echo "Could not clone project \"$git_repo\". Aborting")
+		    exit 1;
+		fi
+		cd "$script_dir/clone"
+		if [ $? != 0 ]; then
+		    (>&2 echo "Could not change dir to \"$script_dir/clone/\". Aborting")
+		    exit 1;
+		fi
+		echo "Success: repository cloned"
 	fi
-	echo "Success: repository cloned"
+
 	git_branch_current=""
 	$( (git_branch_current=`git rev-parse --abbrev-ref HEAD`) 2> /dev/null)
 	if [ $? != 0 ]; then
@@ -205,9 +256,16 @@ function captn_clone_local() {
 		(>&2 echo "Invalid commit id \"$git_commit\"")
 		git_commit=""
 	fi
+
 	# choose commit if necessary
 	if [ "$git_commit" == "" ]; then
-		commits=$(git log --pretty=format:"%H - %cn : %s" -$git_commit_limit)
+		git pull 2> /dev/null
+		if [ $? != 0 ]; then
+		    (>&2 echo "Could not pull branch \"$git_branch\". Aborting")
+		    exit 1;
+		fi
+
+		commits=$( git log --pretty=format:"%H - %cn : %s" -$git_commit_limit )
 		commit_head=$(git rev-parse HEAD)
 		if [ "$commit_head" == "" ]; then
 			echo "Warning: could not get last commit"
@@ -241,6 +299,7 @@ function captn_clone_local() {
 			    echo "Warning: it is possible that updating the server could revert to a previous commit"
 				captn_ask_continue
 			else
+				cat $script_dir/changelog.md
 				echo "Success: changelog generated in \"$script_dir/changelog.md\""
 			fi
 		fi
@@ -296,6 +355,8 @@ function captn_choose_commit() {
 	fi
 	echo "$FUNCNAME: using commit id \"$git_commit\""
 }
+
+
 
 
 
@@ -362,7 +423,7 @@ function captn_update_git_remote() {
 	echo "$FUNCNAME: connecting to $ssh_host:$ssh_port"
 	{
 		# eventually add git pull 
-		ssh -tt -p $ssh_port $ssh_user@$ssh_host "cd $remote_dir && git pull && git reset $git_commit --hard"
+		ssh -tt -p $ssh_port $ssh_user@$ssh_host "cd $remote_dir && git pull $git_user@$git_host:$git_repo $git_branch && git reset $git_commit --hard"
 	} > $script_dir/remote_update.txt 2> /dev/null
 	return_code=$?
 	if [ $(grep -c "fatal" $script_dir/remote_update.txt) -ne 0 ]; then
@@ -499,4 +560,42 @@ function array_contains() {
     return $in
 }
 
+function captn_dir() {
+	if [ ! -d "$1" ]; then
+		return 1;
+	fi
+	echo $(ls -A $1)
+	return 0;
+}
+
+function captn_dir_files() {
+	if [ ! -d "$1" ]; then
+		return 1;
+	fi
+	local files=$(ls -A $1)
+	local list=($files)
+	if [ ${#list[@]} -eq 0 ]; then
+		return 0;
+	fi
+	for i in "${list[@]}"; do
+		if [ ! -d "$1/$i" ]; then
+			echo "$i"
+		fi
+	done
+	return 0;
+}
+
+function captn_dir_dirs() {
+	if [ ! -d "$1" ]; then
+		returnexit 1;
+	fi
+	local files=$(ls -A $1)
+	local list=($files)
+	for i in "${list[@]}"; do
+		if [ -d "$1/$i" ]; then
+			echo "$i"
+		fi
+	done
+	return 0;
+}
 

@@ -9,7 +9,6 @@
 	"git_repo": "",
 	"git_user": "",
 	"git_branch": "",
-	"git_dir": "",
 	"git_commit": "",
 	"git_commit_limit": 10,
 	"git_commit_default": "",
@@ -24,11 +23,10 @@
 		],
 
 		"init": [
-			"# Initialize some variables",
+			"# Initialize error level",
 			"set -o pipefail",
 			"set -o errtrace",
-			"set -o nounset",
-			"set -o errexit"
+			"set -o nounset"
 		],
 
 		"deploy-with-git": [

@@ -21,28 +21,19 @@ It's pretty standard for Linux. On windows, you can install GIT bash that will p
 There is many ways to configure captn and deploy your project on the server.
 
 Regular features include:
-- Verify commit id with GIT server on client
 - Ask for commit id to deploy
-- Clone and verify site on client machine
-- archive on remote server
+- Verify commit id with GIT server on client machine
+- Clone and verify project on client machine
+- Archive on remote server
 - Deploy on remote from the GIT server
-- Build a package on client machine
-- Deploy package on remote server
 - Log everything
 - Stop script on critical error
 
 
-Different approach on how to deploy from a developper client machine :
+The GIT and SSH users are configured in the script config json file. It is highly recommanded that an auto connection is configured for GIT and SSH users otherwise the scripts can stop on password prompt or may be not work at all, who knows.
 
-```
-Cilent		---	Deploy ---> 	Remote server
-Run captn						Website
-
-Client		--- Connect -->		Captn server	--- Deploy --->		Remote server
-Run SSH							Run captn							Website
-```
-The GIT and SSH can be configured in
 You can also configure your script to ask for a GIT login or SSH login if you want.
+Additional behaviors can be added as shell commands, functions or calls to captn actions.
 
 
 ## Quick start
@@ -104,6 +95,86 @@ For beginners or when you are developping your script, it is recommanded to use 
 	captn run example:archive-remote -v
 ```
 This will show extra output to explain what is going on.
+
+## Deploy methods
+
+### deploy-with-git
+
+Deploys the GIT repository content as it is with verification of branch, commit ids on local machine and remote server
+
+
+Run the script like this:
+```
+	captn run example:deploy-with-git
+```
+Or put the action ":deploy-with-git" in the default action then run it like this:
+```
+	captn run example
+```
+
+#### Required in the script json file
+- Filled GIT details (git_hst, git_user, git_repo, git_branch)
+- Filled SSH details (ssh_host, ssh_port, ssh_user)
+
+#### Required on local machine and remote server
+- SSH auto connect for GIT and SSH users from local machine
+- SSH auto connect for GIT user from remote server
+- Remote final directory (remote_dir) must be a GIT directory
+
+#### The steps
+1 - Connecting to the remote server to get the last commit id and check the branch
+2 - Cloning project / using the cloned directory on local machine
+3 - Choose the commit id to update to
+4 - Generate changelog from last commit id to new commit id
+5 - Update the remote server after being pretty sure everything is fine
+6 - Do some test to see the server is still working (if provided)
+
+
+If you want to test some urls in the end, you should add your own commands to the ":test" action.
+
+When you are choosing the commit id, you can see the list of commit id to choose from if you are running in verbose mode:
+```
+	captn -v run example:deploy-with-git
+```
+
+### deploy-with-git-simple
+
+Deploys the GIT repository content as it is without verifications
+
+
+Run the script like this:
+```
+	captn run example:deploy-with-git-simple
+```
+Or put the action ":deploy-with-git-simple" in the default action then run it like this:
+```
+	captn run example
+```
+
+#### Required in the script json file
+- Filled GIT details (git_hst, git_user, git_repo, git_branch)
+- Filled SSH details (ssh_host, ssh_port, ssh_user)
+
+#### Required on local machine and remote server
+- SSH auto connect for SSH user from local machine
+- SSH auto connect for GIT user from remote server
+- Remote final directory (remote_dir) must be a GIT directory
+
+
+#### The steps
+1 - Choose the commit id to update to (no list)
+2 - Update the remote server (without much verifications)
+3 - Do some test to see the server is still working (if provided)
+
+
+If you want to test some urls in the end, you should add your own commands to the ":test" action.
+
+
+## Other interesting actions
+
+### archive-remote
+
+
 
 ### Share the project by GIT
 
@@ -207,7 +278,7 @@ Warnings, errors and success are visible without the verbose mode. All others ar
 	}
 ```
 
-*What you should not do*:
+*What you should NOT do*:
 Break the json file, for example by putting double quotes without escape char:
 ```
 	...
@@ -216,7 +287,7 @@ Break the json file, for example by putting double quotes without escape char:
 	...
 ```
 
-You alsa shoulnd put a command on multiple lines (like when using "if").
+You also should NOT put a command on multiple lines (like when using "if").
 ```
 	...
 		"if [ \"$git_user\" != \"\" ]; then",
@@ -241,27 +312,32 @@ You alsa shoulnd put a command on multiple lines (like when using "if").
 	}
 ```
 
-- onError: show on console on error
-- onSuccess: show on console on success
-- 
+- exec: the command to execute or the action to add here
+- echoOnError: show on console on error
+- echoOnSuccess: show on console on success
+- echoBefore: show on console before the execution of the command
+
+To fix: as the BASH shell is in buffered mode, in some case the stderr and stdout are mixed and error can show before some echo. A solution is to wait 1ms after every command, which is not very clean so we might consider something else.
 
 
 ### Ask the captain
 
 There is a common function to ask the user an information.
-The response is stored on the $response global variable.
+The response is stored on the "response" global variable.
 
 ```
 	captn_ask "How old are you"
 	echo "Success: your response is $response"
 ```
+
 this will output :
 ```
-	How old are you?
+	How old are you?  <-- in blue
 	22
-	Your response is 22
+	Success: your response is 22  <-- in green
 ```
-You can also put a default value if the
+
+You can also put a default value if user response is empty (only types enter)
 ```
 	captn_ask "Are you a troll" "no"
 	echo "$response"
@@ -275,6 +351,8 @@ You can also ask the user if he wants to continue based on some informations. To
 
 
 ### Calling an action
+
+An action of your script is a set of shell commands (run program or function with parameters) or some calls to other actions.
 
 A call to an action always begins with ":". So, in the command string,
 
@@ -308,6 +386,17 @@ This action will:
 
 ## Changelog
 
+### V0.1.1
+- Tweak deploy with git
+- Fix: clean action doe not delete all the files
+- Deleting unused script variable git_dir
+- Adding the "echoBefore" command option
+- Adding continue on error command option
+- Adding "echoOnError" and "echoOnSuccess"
+- Fix captn init
+- Fix output in stdout sometimes does not render when exiting
+- Disable log for init
+
 ### V0.1 First version
-- Run scripts
+- Run scripts and do stuff
 
