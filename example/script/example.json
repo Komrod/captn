@@ -1,0 +1,24 @@
+{
+	"script_description": "",
+	"script_warning" : "",
+
+	"ssh_host": "",
+	"ssh_port": "",
+	"ssh_user": "",
+	
+	"git_host": "",
+	"git_repo": "",
+	"git_user": "",
+	"git_branch": "",
+	"git_dir": "",
+	
+	"archive_dir": "",
+
+	"remote_dir": "",
+	
+	"actions": {
+		"default": [
+			":deploy-with-git"
+		]
+	}
+}

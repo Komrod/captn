@@ -1,0 +1,117 @@
+{
+	"script_description": "",
+	"script_warning" : "",
+	"script_delay": 0,
+	"ssh_host": "",
+	"ssh_port": "",
+	"ssh_user": "",
+	"git_host": "",
+	"git_repo": "",
+	"git_user": "",
+	"git_branch": "",
+	"git_commit": "",
+	"git_commit_limit": 10,
+	"git_commit_default": "",
+	"remote_dir": "",
+	"archive_dir": "",
+	"archive_name": "setv-api",
+	"archive_command": "tar cpvzf",
+	"archive_extension": ".tar.gz",
+	"actions": {
+		"default": [
+			":deploy-with-git"
+		],
+
+		"init": [
+			"# Initialize error level",
+			"set -o pipefail",
+			"set -o errtrace",
+			"set -o nounset"
+		],
+
+		"deploy-with-git": [
+			"# This script deploys on remote server using GIT",
+			":init",
+			"captn_infos",
+			":clean",
+			":check-git-remote",
+			":deploy-git-local",
+			":deploy-git-remote",
+			":test"
+		],
+		"deploy-with-git-simple": [
+			"# This script deploys on remote server using GIT with just the commit id",
+			":init",
+			"captn_infos",
+			":clean",
+			"captn_choose_commit",
+			":deploy-git-remote",
+			":test"
+		],
+		"deploy-with-package": [
+			"# This script deploys on remote server using a package",
+			":init",
+			"captn_start",
+			":clean"
+		],
+		"deploy-with-local-package": [
+			"# This script deploy on remote server using a local package",
+			":action_init",
+			"captn_infos",
+			":clean",
+			"captn_ask \"Local package to use\"",
+			"package_file=\"$result\"",
+			":deploy-package",
+			":test"
+		],
+		"archive-remote": [
+			"# Build an archive on remote server",
+			"captn_archive_remote"
+		],
+		"clean": [
+			"# delete files in cache directory of the script",
+			"captn_clean"
+		],
+		"clean-all": [
+			"# delete and recreate the whole cache directory of the script",
+			"captn_clean_all"
+		],
+		"clean-clone": [
+			"# delete and recreate the clone directory of the script",
+			"captn_clean_clone"
+		],
+		"check-git-remote": [
+			"# connect to remote server to check GIT commit id and branch",
+			"captn_check_git_remote"
+		],
+		"deploy-git-local": [
+			"# Clone project from GIT and install localy",
+			":clone-local",
+			":install-local",
+			":verify-local"
+		],
+		"deploy-git-remote": [
+			"# Clone project from GIT and install on remote",
+			":update-git-remote",
+			":install-remote",
+			":verify-remote"
+		],
+		"test": [
+			"# Testing that the site is working"
+		],
+		"clone-local": [
+			"# Local clone project from GIT",
+			"captn_clone_local"
+		],
+		"update-local": [],
+		"verify-local": [],
+		"deploy-remote": [],
+		"verify-remote": [],
+		"install-local": [],
+		"update-git-remote": [
+			"# Remote update from GIT with a commit id",
+			"captn_update_git_remote"
+		],
+		"install-remote": []
+	}
+}

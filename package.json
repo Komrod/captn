@@ -1,0 +1,57 @@
+{
+  "name": "node-captn",
+  "version": "0.1.2",
+  "description": "Easy web server deployment",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Komrod/captn.git"
+  },
+  "keywords": [
+    "captn",
+    "captn deploy",
+    "captain",
+    "web",
+    "website",
+    "shell",
+    "commit",
+    "git",
+    "node",
+    "server",
+    "deployment",
+    "deploy script",
+    "deploy node",
+    "deploy app",
+    "deploy server",
+    "deploy git",
+    "deploy commit",
+    "deploy with git",
+    "deploy php",
+    "deploy javascript",
+    "production",
+    "developper"
+  ],
+  "author": "Komrod <komrod@hotmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Komrod/captn/issues"
+  },
+  "homepage": "https://github.com/Komrod/captn#readme",
+  "dependencies": {
+    "chalk": "^1.1.3",
+    "co": "^4.6.0",
+    "co-prompt": "^1.0.0",
+    "colors": "^1.1.2",
+    "commander": "^2.9.0",
+    "deasync": "^0.1.9",
+    "ncp": "^2.0.0",
+    "node-screwdriver": "^0.1.3",
+    "web-servo": "^0.5.0"
+  },
+  "bin": {
+    "captn": "captn.js"
+  }
+}
