@@ -389,6 +389,12 @@ You can also ask the user if he wants to continue based on some informations. To
 
 ## Changelog
 
+### V0.1.2
+- Fix: creation of script cache directory "script_dir"
+- Make an action to clean everything, even the cloned directory
+- Dont delete the cloned repository of the project everytime we clean
+- Add logo and console image
+
 ### V0.1.1
 - Tweak deploy with git
 - Fix: clean action does not delete all the files
