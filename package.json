@@ -1,6 +1,6 @@
 {
   "name": "node-captn",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Easy web server deployment",
   "main": "index.js",
   "scripts": {
@@ -11,6 +11,9 @@
     "url": "git+https://github.com/Komrod/captn.git"
   },
   "keywords": [
+    "captn",
+    "captn deploy",
+    "captain",
     "web",
     "website",
     "shell",
@@ -26,6 +29,8 @@
     "deploy git",
     "deploy commit",
     "deploy with git",
+    "deploy php",
+    "deploy javascript",
     "production",
     "developper"
   ],

@@ -3,8 +3,9 @@
 - make a changelog action
 - captn list must only show .json files
 - bug: captn list dont show complete script name
-- action to test SSH, GIT
-- retrieve GIT project by url (github like)
+- action to test SSH
+- action to test GIT
+- retrieve GIT project by http url (github like)
 
 - put the action name in the shell script file
 - take a script by default if there is only one
@@ -12,19 +13,20 @@
 - cli option to confirm every action execution
 - "if" in command option
 - cli option "-y" to say yes to everything in batch mode
-- detects actions infinite loop
-- handle infinite loop of actions
+- detects actions infinite loop on explain
+- handle infinite loop of actions (level depth)
 - function to ask a response on a selected list
-- command line "build" to return script (-o) or write script
-- command line "diagnose"
-- lint the shell scripts before running
+- cli command "build" to return script in stdout (-o) or just write script
+- cli command "diagnose"
+- lint the shell scripts before running (if possible)
+- readme describes captn functions
 
-- dont show empty actions on cli explain
-- function to disable and enable ctrl-c
+- dont show empty actions on cli command "explain"
+- function to disable / enable "ctrl-c"
 - console show default answer when pressing enter in captn_ask
-- cli command to build script
 - put colors directly in script
-- describe main actions and sub actions in readme
+- possible to run directly the script
+- readme describes main actions and sub actions
 - show commits with current colored in function captn_commit
 - script warning on multiple lines
 - optional choose ssh command in captn config
@@ -32,6 +34,8 @@
 
 ## DONE
 
+- v0.1.2
+- add logo and console image
 - make an action to clean everything, even the cloned directory
 - fix: creation of script cache dir "script_dir"
 - dont delete the cloned repository of the script everytime we clean
