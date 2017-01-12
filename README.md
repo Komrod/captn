@@ -4,6 +4,10 @@ Easy web server deployment
 
 This is a prototype.
 
+<!-- The cool logo -->
+<a href="#"><img src="https://github.com/Komrod/captn/blob/develop/image/captn_logo.png" width="200" /></a>
+
+
 For the moment, it deploys only GIT content but captn is easy to modify by adding your own commands where you want them or using captn built-in functions.
 
 *Features include:*
@@ -156,7 +160,7 @@ Or put the action ":deploy-with-git" in the default action then run it like this
 ```
 
 #### Required in the script json file
-- Filled GIT details (git_hst, git_user, git_repo, git_branch)
+- Filled GIT details (git_host, git_user, git_repo, git_branch)
 - Filled SSH details (ssh_host, ssh_port, ssh_user)
 
 #### Required on local machine and remote server
@@ -165,14 +169,12 @@ Or put the action ":deploy-with-git" in the default action then run it like this
 - Remote final directory (remote_dir) must be a GIT directory
 
 #### The steps
-```
-1 - Connecting to the remote server to get the last commit id and check the branch
-2 - Cloning project / using the cloned directory on local machine
-3 - Choose the commit id to update to
-4 - Generate changelog from last commit id to new commit id
-5 - Update the remote server after being pretty sure everything is fine
-6 - Do some test to see the server is still working (if provided)
-```
+- 1 - Connecting to the remote server to get the last commit id and check the branch
+- 2 - Cloning project / using the cloned directory on local machine
+- 3 - Choose the commit id to update to
+- 4 - Generate changelog from last commit id to new commit id
+- 5 - Update the remote server after being pretty sure everything is fine
+- 6 - Do some test to see the server is still working (if provided)
 
 
 If you want to test some urls in the end, you should add your own commands to the ":test" action.
@@ -207,11 +209,9 @@ Or put the action ":deploy-with-git-simple" in the default action then run it li
 
 
 #### The steps
-```
-1 - Choose the commit id to update to (no list)
-2 - Update the remote server (without much verifications)
-3 - Do some test to see the server is still working (if provided)
-```
+- 1 - Choose the commit id to update to (no list)
+- 2 - Update the remote server (without much verifications)
+- 3 - Do some test to see the server is still working (if provided)
 
 If you want to test some urls in the end, you should add your own commands to the ":test" action.
 
@@ -322,11 +322,11 @@ You also should NOT put a command on multiple lines (like when using "if").
 
 Available options:
 - exec: the command to execute or the action to add here
-- echoOnError: show on console on error
-- echoOnSuccess: show on console on success
-- echoBefore: show on console before the execution of the command
+- echoOnError: show on console / log on error
+- echoOnSuccess: show on console / log on success
+- echoBefore: show on console / log before the execution of the command
 
-To fix: as the BASH shell is in buffered mode, in some cases the stderr and stdout are not properly mixed and error can be shown before some echo that comes first. A solution is to wait 1ms after every command, which is not very clean so we might consider something else.
+Note: as the BASH shell is in buffered mode, in some cases the stderr and stdout are not properly mixed and error can be shown before some echo that comes first. A solution is to wait 1ms after every command, which is not very clean so we might consider something else.
 
 
 ### Calling an action
@@ -389,7 +389,7 @@ You can also ask the user if he wants to continue based on some informations. To
 
 ### V0.1.1
 - Tweak deploy with git
-- Fix: clean action doe not delete all the files
+- Fix: clean action does not delete all the files
 - Deleting unused script variable git_dir
 - Adding the "echoBefore" command option
 - Adding continue on error command option
