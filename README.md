@@ -5,7 +5,7 @@ Easy web server deployment
 This is a prototype.
 
 <!-- The cool logo -->
-<center><a href="#"><img src="https://github.com/Komrod/captn/blob/develop/image/captn_logo.png" height="200" /></a></center>
+<center><a href="#"><img src="https://raw.githubusercontent.com/Komrod/captn/develop/image/captn_logo.png" height="200" /></a></center>
 
 For the moment, it deploys only GIT content but captn is easy to modify by adding your own commands where you want them or using captn built-in functions.
 
@@ -19,7 +19,7 @@ For the moment, it deploys only GIT content but captn is easy to modify by addin
 - Stop script on critical error
 
 <!-- The console example -->
-<center><a href="#"><img src="https://github.com/Komrod/captn/blob/develop/image/captn_console_01.png" /></a></center>
+<center><a href="#"><img src="https://raw.githubusercontent.com/Komrod/captn/develop/image/captn_console_01.png" /></a></center>
 
 
 ## Requires

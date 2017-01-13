@@ -1,13 +1,19 @@
+
 ## TODO
 
-- make a changelog action
 - captn list must only show .json files
 - bug: captn list dont show complete script name
-- action to test SSH
-- action to test GIT
+- action to test local SSH
+- action to test local GIT
+- action to test remote GIT
+- action to test auto connect to remote server
 - retrieve GIT project by http url (github like)
+- pipe stderr to stdin to prevent mixed output, remove sleep
 
-- put the action name in the shell script file
+- value "git_changelog" is the changelog file path in the GIT repo
+- adding changelog to repo after updating successfully the remote server
+- handle .dist files
+- put the action name in the shell script file "name__action.sh"
 - take a script by default if there is only one
 - cli option to change script variables
 - cli option to confirm every action execution
@@ -21,6 +27,7 @@
 - lint the shell scripts before running (if possible)
 - readme describes captn functions
 
+- extend a script from another
 - dont show empty actions on cli command "explain"
 - function to disable / enable "ctrl-c"
 - console show default answer when pressing enter in captn_ask
@@ -33,7 +40,12 @@
 
 
 ## DONE
-
+- rename /clone/ to /repo/
+- refactor of shell functions
+- make a changelog function and action
+- add captn_is_commit to verify if an id is a valid commit id
+- fix echoOnSuccess show on continueOnError
+- add some sleep 0.001 to prevent mixed output
 - v0.1.2
 - add logo and console image
 - make an action to clean everything, even the cloned directory

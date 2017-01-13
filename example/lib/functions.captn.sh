@@ -96,29 +96,30 @@ function captn_clean_all() {
 }
 
 
-# Function to delete the cloned repository
-function captn_clean_clone() {
-	echo "$FUNCNAME: Start cleaning cloned directory"
+# Function to delete the repository directory
+function captn_clean_repo() {
+	echo "$FUNCNAME: Start cleaning repository directory"
 	echo "$FUNCNAME: script cache directory is \"$script_dir\""
-	echo "$FUNCNAME: deleting cloned directory"
-	if [ ! -d "$script_dir/clone/" ]; then
-		echo "Warning: no clone directory"
+	echo "$FUNCNAME: deleting repository directory"
+	if [ ! -d "$script_dir/repo/" ]; then
+		echo "Warning: no repository directory"
 	fi
-	rm -fr "$script_dir/clone/"
+	rm -fr "$script_dir/repo/"
 	# Check delete error
 	if [ $? != 0 ]; then
 		(>&2 echo "$FUNCNAME: failed to delete directory. Aborting")
 		exit 1;
 	fi
-	echo "Success: script clone directory deleted"
+	echo "Success: script repository directory deleted"
 	return 0
 }
 
 
 #################################################
-# Check git remote
+# GIT
 
-# Function to check remote server by SSH
+
+# Function to check GIT project directory on remote server by SSH
 function captn_check_git_remote() {
 	echo "$FUNCNAME: getting branch from remote server"
 	echo "$FUNCNAME: connecting to $ssh_host:$ssh_port"
@@ -175,48 +176,50 @@ function captn_archive_remote() {
 }
 
 
-#################################################
-# Clone
+# Clone project on local machine if repository directory not already created
+function captn_repo_local() {
 
-function captn_clone_local() {
-
-	############################################
-	# cloning
 	echo "$FUNCNAME: start"
+
 	if [ ! -d $script_dir ]; then
 	    (>&2 echo "Could not find cache directory \"$script_dir\". Aborting")
 	    exit 1;
 	fi
 	
-	if [ -d "$script_dir/clone/" ]; then
-		echo "$FUNCNAME: clone directory already exists"
+	if [ -d "$script_dir/repo/" ]; then
+		echo "$FUNCNAME: repository directory already exists"
 
-		cd "$script_dir/clone/"
+		cd "$script_dir/repo/"
 		if [ $? != 0 ]; then
-		    (>&2 echo "Could not change to dir \"$script_dir/clone/\". Aborting")
+		    (>&2 echo "Could not change to dir \"$script_dir/repo/\". Aborting")
 		    exit 1;
 		fi
 
 		result=$( (git status) 2> /dev/null )
 		if [ $? != 0 ]; then
-		    echo "Warning: could not get status of dir \"$script_dir/clone/\""
-		    echo "$FUNCNAME: deleting invalid clone directory"
-		    captn_clean_clone
-		    echo "Success: Clone directory deleted"
+		    echo "Warning: could not get status of dir \"$script_dir/repo/\""
+		    echo "$FUNCNAME: deleting invalid repository directory"
+		    captn_clean_repo
+		    echo "Success: repository directory deleted"
 		fi
 	fi
 
+	cd "$script_dir"
+	if [ $? != 0 ]; then
+	    ( >&2 echo "Warning: could not change directory to \"$script_dir/\". Aborting")
+	    exit 1
+	fi
 
-	if [ ! -d "$script_dir/clone/" ]; then
-		result=$( (git clone $git_user@$git_host:$git_repo clone) 2> /dev/null )
+	if [ ! -d "$script_dir/repo/" ]; then
+		result=$( (git clone $git_user@$git_host:$git_repo repo) 2> /dev/null )
 		if [ $? != 0 ]; then
 		    (>&2 echo "$result")
 		    (>&2 echo "Could not clone project \"$git_repo\". Aborting")
 		    exit 1;
 		fi
-		cd "$script_dir/clone"
+		cd "$script_dir/repo"
 		if [ $? != 0 ]; then
-		    (>&2 echo "Could not change dir to \"$script_dir/clone/\". Aborting")
+		    (>&2 echo "Could not change dir to \"$script_dir/repo/\". Aborting")
 		    exit 1;
 		fi
 		echo "Success: repository cloned"
@@ -233,7 +236,13 @@ function captn_clone_local() {
 	############################################
 	# branch
 	if [ "$git_branch_current" != "$git_branch" ]; then
-		echo "captn_clone_local: changing branch"
+
+		cd "$script_dir/repo/"
+		if [ $? != 0 ]; then
+		    (>&2 echo "Could not change to dir \"$script_dir/repo/\". Aborting")
+		    exit 1;
+		fi
+		echo "$FUNCNAME: changing branch $git_branch"
 		result=$( (git checkout $git_branch) 2> /dev/null )
 		if [ $? != 0 ]; then
 		    (>&2 echo "$result")
@@ -244,91 +253,41 @@ function captn_clone_local() {
 	else
 		echo "Success: already on branch \"$git_branch\""
 	fi
-
-	############################################
-	# check current commit in $git_commit
-	local commit="empty"
-	if [ "$git_commit" != "" ]; then
-		commit=$( (git cat-file -t $git_commit) 2> /dev/null )
-	fi
-
-	if [ "$git_commit" != "" ] && [ "$commit" != "commit" ]; then
-		(>&2 echo "Invalid commit id \"$git_commit\"")
-		git_commit=""
-	fi
-
-	# choose commit if necessary
-	if [ "$git_commit" == "" ]; then
-		git pull 2> /dev/null
-		if [ $? != 0 ]; then
-		    (>&2 echo "Could not pull branch \"$git_branch\". Aborting")
-		    exit 1;
-		fi
-
-		commits=$( git log --pretty=format:"%H - %cn : %s" -$git_commit_limit )
-		commit_head=$(git rev-parse HEAD)
-		if [ "$commit_head" == "" ]; then
-			echo "Warning: could not get last commit"
-		else
-			echo "Last commit is \"$commit_head\""
-		fi
-		echo "List of $git_commit_limit last commits:"
-		echo "$commits"
-		captn_commit $commit_head
-	fi
-	echo "$FUNCNAME: using commit id \"$git_commit\""
-
-	############################################
-	# generate changelog
-	if [ "$git_commit_remote" == "" ]; then
-	    echo "Warning: no information on the remote commit id of the server"
-	    echo "No information in variable \$git_commit_remote"
-	    captn_ask_continue
-	else
-		if [ "$git_commit_remote" == "$git_commit" ]; then
-		    echo "Warning: targeted commit id \"$git_commit\" is already on the server"
-		    captn_ask_continue
-		else
-			echo "$FUNCNAME: generating changelog"
-			git log $git_commit_remote..$git_commit --pretty=format:"%H - %cn, %ad : %s"  > $script_dir/changelog.md
-			if [ $? != 0 ]; then
-			    echo "Warning: could not generate changelog in \"$script_dir/changelog.txt\""
-			    captn_ask_continue
-			elif [ -s $script_dir/changelog.txt ]; then
-			    echo "Warning: changelog is empty in \"$script_dir/changelog.txt\""
-			    echo "Warning: it is possible that updating the server could revert to a previous commit"
-				captn_ask_continue
-			else
-				cat $script_dir/changelog.md
-				echo "Success: changelog generated in \"$script_dir/changelog.md\""
-			fi
-		fi
-	fi
-
-	echo "$FUNCNAME: updating local repository to commit \"$git_commit\""
-	result=$( (git reset $git_commit --hard) 2> /dev/null )
-	if [ $? != 0 ]; then
-		(>&2 echo "$result")
-		(>&2 echo "Could not update local repository to correct commit id \"$git_commit\". Aborting")
-		exit 1;
-	fi
-	echo "Success: local repository updated"
 }
 
 
+# Choose the commit and set local project to commit id
 function captn_choose_commit() {
 	# choose commit if necessary
+	echo "$FUNCNAME: start"
+
 	if [ "$git_commit" == "" ]; then
-		if [ ! -d "$script_dir/clone/" ]; then
+		if [ ! -d "$script_dir/repo/" ]; then
 			echo "Warning: no local repository found. Could not get commit list"
 			captn_commit $git_commit_default
 		else
+			cd "$script_dir/repo/"
+			if [ $? != 0 ]; then
+				sleep 0.001
+				(>&2 echo "Could not change to repository directory. Aborting")
+				exit 1;
+			fi
+			# pull
+			echo "$FUNCNAME: git pull"
+			result=$( (git pull) 2> /dev/null )
+			if [ $? != 0 ]; then
+			    (>&2 echo "$result")
+			    (>&2 echo "Could not pull. Aborting")
+			    exit 1;
+			fi
 			# get local commit list
 			if [ "$git_commit_list" == "" ]; then
+				echo "$FUNCNAME: get the commit list"
 				git_commit_list=$(git log --pretty=format:"%H - %cn : %s" -$git_commit_limit)
 			fi
 			# get local HEAD commit id
 			if [ "$git_commit_head" == "" ]; then
+				echo "$FUNCNAME: get the branch HEAD"
 				git_commit_head=$(git rev-parse HEAD)
 			fi
 			if [ "$git_commit_head" == "" ]; then
@@ -354,10 +313,170 @@ function captn_choose_commit() {
 		exit 1;
 	fi
 	echo "$FUNCNAME: using commit id \"$git_commit\""
+
 }
 
 
+# Choose the commit ids to use with changelog and store it in $git_commit_remote and $git_commit
+function captn_choose_changelog() {
+	echo "$FUNCNAME: start"
+	if [ ! -d "$script_dir/repo/" ]; then
+		echo "Warning: no local repository found. Could not get commit list"
+	else
+		cd "$script_dir/repo/"
+		if [ $? != 0 ]; then
+			sleep 0.001
+			(>&2 echo "Could not change to repository directory. Aborting")
+			exit 1;
+		fi
+		# pull
+		echo "$FUNCNAME: git pull"
+		result=$( (git pull) 2> /dev/null )
+		if [ $? != 0 ]; then
+		    (>&2 echo "$result")
+		    (>&2 echo "Could not pull. Aborting")
+		    exit 1;
+		fi
 
+		# get local commit list
+		if [ "$git_commit_list" == "" ]; then
+			echo "$FUNCNAME: get the commit list"
+			git_commit_list=$(git log --pretty=format:"%H - %cn : %s" -$git_commit_limit)
+		fi
+		# get local HEAD commit id
+		echo "List of $git_commit_limit last commits:"
+		echo "$git_commit_list"
+	fi
+
+	captn_ask "Commit id from"
+	git_commit_remote="$response"
+	if [ $? != 0 ]; then
+		(>&2 echo "Error while choosing commit id. Aborting")
+		exit 1;
+	fi
+	captn_ask "Commit id to"
+	git_commit="$response"
+	if [ $? != 0 ]; then
+		(>&2 echo "Error while choosing commit id. Aborting")
+		exit 1;
+	fi
+
+	echo "$FUNCNAME: using commit ids \"$git_commit_remote..$git_commit\""
+}
+
+
+# Update local GIT to commits id $1
+# use: captn_update_local d20ba56cbe573ee7e25d1c02e9be41165263dba9
+# Warning on: 
+# Error on: no update
+# Critical error on: 
+function captn_update_local() {
+	echo "$FUNCNAME: start"
+	local file="$script_dir/changelog.txt"
+	numargs="$#"
+	if [ $numargs != "1" ]; then
+		sleep 0.001
+		(>&2 echo "Invalid number of arguments to update local repository")
+		return 1;
+	fi
+
+	captn_is_commit $1
+	if [ $? == 1 ]; then
+		sleep 0.001
+		(>&2 echo "Invalid commit id \"$1\"")
+		(>&2 echo "Unable to update local repository")
+		return 1;
+	fi
+
+	result=$( (git reset $git_commit --hard) 2> /dev/null )
+	if [ $? != 0 ]; then
+		(>&2 echo "$result")
+		(>&2 echo "Could not update local repository to correct commit id \"$1\"")
+		return 1;
+	fi
+
+	echo "Success: local repository update to commit id \"$1\""
+	return 0;
+}
+
+
+# Generate changelog.md between commits id $1 and $2
+# use: captn_changelog d20ba56cbe573ee7e25d1c02e9be41165263dba9 af08a57a08f98bc9ac89a51f163fc6dd087fbd6c
+# Warning on: could not generate changelog, changelog is empty
+# Error on: invalid commit id, invalid arguments
+# Critical error on: could not delete old changelog
+# prompt: continue on warning or error
+function captn_changelog() {
+	echo "$FUNCNAME: start"
+	local file="$script_dir/changelog.txt"
+	numargs="$#"
+	if [ $numargs != "2" ]; then
+		sleep 0.001
+		(>&2 echo "Invalid number of arguments to generate the changelog")
+	    echo "Warning: could not generate changelog in \"$file\""
+	    captn_ask_continue
+		return 0;
+	fi
+
+	echo "$FUNCNAME: changelog from \"$1\" to \"$2\""
+
+	captn_is_commit $1
+	if [ $? == 1 ]; then
+		sleep 0.001
+		(>&2 echo "Invalid commit id \"$1\"")
+	    echo "Warning: could not generate changelog in \"$file\""
+	    captn_ask_continue
+		return 0;
+	fi
+
+	captn_is_commit $2
+	if [ $? == 1 ]; then
+		sleep 0.001
+		(>&2 echo "Invalid commit it \"$2\"")
+	    echo "Warning: could not generate changelog in \"$file\""
+	    captn_ask_continue
+	    return 0;
+	fi
+
+
+	if [ -f $file ]; then
+		rm "$file"
+		if [ $? != 0 ]; then
+			sleep 0.001
+			(>&2 echo "Could not delete old changelog file \"$file\"")
+		    echo "Warning: could not generate changelog in \"$file\""
+		    captn_ask_continue
+			return 1;
+		fi
+	fi
+	
+	echo "$FUNCNAME: generating"
+
+	git log $1..$2 --pretty=format:"%H - %cn, %ad : %s"  > $file
+	local filesize=$(stat -c%s "$file")
+	if [ $? != 0 ]; then
+	    echo "Warning: could not generate changelog in \"$file\""
+	    captn_ask_continue
+	elif [ $filesize -eq 0 ]; then
+	    echo "Warning: changelog is empty in \"$file\""
+	    captn_ask_continue
+	    return 0;
+	else
+		local file_md="$script_dir/changelog.md"
+		echo "## Changelog - date $script_date" > $file_md
+		echo "" >> $file_md
+		cat $file >> $file_md
+
+		if [ $? != 0 ]; then
+		    echo "Warning: could not generate changelog in \"$file_md\""
+		    return 1;
+		fi
+		echo ""
+		echo "Success: changelog generated in \"$file_md\""
+		return 0;
+	fi
+	return 0;
+}
 
 
 #################################################
@@ -366,7 +485,7 @@ function captn_choose_commit() {
 
 function captn_deploy_local() {
 	echo "$FUNCNAME: start"
-	root="$script_dir/clone/"
+	root="$script_dir/repo/"
 
 	# composer update / install
 #	if [ "$use_deploy_composer" == "1" ]; then;
@@ -391,7 +510,7 @@ function captn_deploy_local() {
 
 function captn_verify_local() {
 	echo "$FUNCNAME: start"
-	root="$script_dir/clone/"
+	root="$script_dir/repo/"
 
 	# lint some files
 }
@@ -414,6 +533,7 @@ function captn_deploy_remote() {
 
 # Update 
 function captn_update_git_remote() {
+	echo "$FUNCNAME: start"
 	captn_ask "Do you really want to deploy to the remote server" "no"
 	if [ "$(captn_yes $response)" == "0" ]; then
 	    (>&2 echo "User choose to Abort")
@@ -465,13 +585,51 @@ function captn_finish() {
 #################################################
 # General functions
 
+
+# Return 1 if a commit id $1 is valid for the current repository local project 
+# use: captn_is_commit af08a57a08f98bc9ac89a51f163fc6dd087fbd6c
+# use: if [ captn_is_commit HEAD ]; then ...
+# Warning on: no repository dir
+function captn_is_commit() {
+	numargs="$#"
+	if [ $numargs != "1" ]; then
+		sleep 0.001
+		(>&2 echo "Invalid number of arguments to verify commit")
+		return 1;
+	fi
+
+	echo "$FUNCNAME: verify commit id \"$1\""	
+
+	if [ ! -d "$script_dir/repo/" ]; then
+		echo "Warning: No repository directory in script cache directory. Could not verify commit id"
+		return 1;
+	fi
+	
+	cd "$script_dir/repo/"
+	if [ $? != 0 ]; then
+		sleep 0.001
+		echo "Warning: Could not change to repository directory. Could not verify commit id"
+		return 1;
+	fi
+
+	local commit="empty"
+	commit=$( (git cat-file -t $1) 2> /dev/null )
+
+	if [ "$commit" != "commit" ]; then
+		return 1;
+	fi
+	return 0;
+}
+
+
 function captn_ssh() {
-	echo "$FUNCNAME: Connect to SSH"
+	echo "$FUNCNAME: Connecting to SSH"
 	echo "$FUNCNAME: Executing command \"$1\""
 	local cmd=$1
 	{
 		ssh -tt -p $ssh_port $ssh_user@$ssh_host $cmd
 	} > $script_dir/remote.txt 2> /dev/null
+	echo "$FUNCNAME: generated file remote.txt"
 	if [ $? != 0 ]; then
 	    (>&2 cat $script_dir/remote.txt)
 	    (>&2 echo "Error while connecting to SSH server or executing the command")
@@ -493,8 +651,8 @@ function captn_commit() {
 	git_commit="$response"
 
 	# verify commit id
-	if [ -d "$script_dir/clone/" ]; then
-		cd "$script_dir/clone/"
+	if [ -d "$script_dir/repo/" ]; then
+		cd "$script_dir/repo/"
 		local commit=$( (git cat-file -t $git_commit) 2> /dev/null )
 		if [ "$commit" != "commit" ]; then
 			(>&2 echo "Invalid commit id \"$git_commit\"")
@@ -540,6 +698,9 @@ function captn_ask() {
 }
 
 
+# echo "1" if the parameter can interprete as true (values listed in $scipt_true_values)
+# use: captn_yes $response
+# use: if [ "$(captn_yes $value)" == "1" ] then; ...
 function captn_yes() {
 	local yes=($script_true_values)
 	array_contains yes $1 && echo "1" || echo "0"
@@ -547,7 +708,15 @@ function captn_yes() {
 }
 
 
-function array_contains() { 
+# echo "1" if the $1 parameter is in list $2 parameter
+function captn_in_list() {
+	local list=($2)
+	array_contains list $1 && echo "1" || echo "0"
+	return 0
+}
+
+# return 1 if the
+function array_contains() {
     local array="$1[@]"
     local seeking=$2
     local in=1

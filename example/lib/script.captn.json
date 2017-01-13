@@ -23,8 +23,8 @@
 		],
 
 		"init": [
-			"# Initialize error level",
-			"set -o pipefail",
+			"# Initialize some variables",
+			"# set -o pipefail",
 			"set -o errtrace",
 			"set -o nounset"
 		],
@@ -37,6 +37,7 @@
 			":check-git-remote",
 			":deploy-git-local",
 			":deploy-git-remote",
+			"captn_check_git_remote",
 			":test"
 		],
 		"deploy-with-git-simple": [
@@ -76,32 +77,43 @@
 			"# delete and recreate the whole cache directory of the script",
 			"captn_clean_all"
 		],
-		"clean-clone": [
-			"# delete and recreate the clone directory of the script",
-			"captn_clean_clone"
+		"clean-repo": [
+			"# delete and recreate the repository directory of the script",
+			"captn_clean_repo"
+		],
+		"changelog": [
+			"# generate the changelog between 2 commit ids",
+			"captn_repo_local",
+			"captn_choose_changelog",
+			"captn_update_local $git_commit",
+			"captn_changelog $git_commit_remote $git_commit"
 		],
 		"check-git-remote": [
 			"# connect to remote server to check GIT commit id and branch",
 			"captn_check_git_remote"
 		],
 		"deploy-git-local": [
-			"# Clone project from GIT and install localy",
-			":clone-local",
+			"# Clone project from GIT in repository and install on local machine",
+			":repo-local",
 			":install-local",
 			":verify-local"
 		],
 		"deploy-git-remote": [
-			"# Clone project from GIT and install on remote",
+			"# Clone project from GIT in remote directory and install on remote server",
 			":update-git-remote",
 			":install-remote",
 			":verify-remote"
 		],
 		"test": [
-			"# Testing that the site is working"
+			"# Testing that the site is working",
+			"# Put your test here"
 		],
-		"clone-local": [
-			"# Local clone project from GIT",
-			"captn_clone_local"
+		"repo-local": [
+			"# Local clone project from GIT, choose the commit id, update the local repo and generate a changelog",
+			"captn_repo_local",
+			"captn_choose_commit",
+			"captn_update_local $git_commit",
+			"captn_changelog $git_commit_remote $git_commit"
 		],
 		"update-local": [],
 		"verify-local": [],
