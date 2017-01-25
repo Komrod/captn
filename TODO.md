@@ -1,6 +1,8 @@
 
 ## TODO
 
+- update screwdriver version and use polyfill
+- dont copy and dont use lib/ directory when init
 - captn list must only show .json files
 - bug: captn list dont show complete script name
 - action to test local SSH
@@ -40,6 +42,7 @@
 
 
 ## DONE
+
 - rename /clone/ to /repo/
 - refactor of shell functions
 - make a changelog function and action
